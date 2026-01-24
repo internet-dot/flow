@@ -19,8 +19,6 @@ flow/
 ├── templates/
 │   ├── claude/
 │   │   └── commands/       # Claude Code commands (18 commands)
-│   ├── gemini/
-│   │   └── commands/       # Gemini CLI commands (18 commands)
 │   ├── skills/             # Consolidated skills library (50+ skills)
 │   │   ├── flow/           # Flow workflow skill
 │   │   ├── beads/          # Beads integration skill
@@ -34,7 +32,7 @@ flow/
 │       ├── patterns.md     # Project patterns template
 │       ├── learnings.md    # Per-track learnings template
 │       └── workflow.md     # Workflow template
-├── commands/flow/          # Symlink to templates/gemini/commands (Gemini compat)
+├── commands/flow/          # Gemini commands
 ├── ref/                    # Reference implementations
 ├── CLAUDE.md               # This file
 ├── GEMINI.md               # Gemini CLI context
@@ -184,7 +182,7 @@ At phase completion:
 ## Development Notes
 
 - **Claude Code commands:** Markdown files in `templates/claude/commands/`
-- **Gemini CLI commands:** TOML files in `templates/gemini/commands/` (symlinked to `commands/flow/`)
+- **Gemini CLI commands:** TOML files in `commands/flow/`
 - **Skills:** Use SKILL.md format with auto-activation patterns
 - **Styleguides:** Code style guides in `templates/styleguides/`
 - **Agent templates:** User project templates in `templates/agent/`
@@ -208,7 +206,7 @@ cp -r templates/skills/* ~/.claude/skills/
 # Install as extension
 gemini install flow
 # Or copy manually
-cp -r templates/gemini/commands/* ~/.gemini/extensions/flow/commands/
+cp -r commands/* ~/.gemini/extensions/flow/commands/
 ```
 
 ### Beads (Required)

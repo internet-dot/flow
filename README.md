@@ -48,7 +48,7 @@ cp -r templates/skills/* ~/.claude/skills/
 gemini extensions install https://github.com/cofin/flow --auto-update
 
 # Or copy manually
-cp -r templates/gemini/commands/* ~/.gemini/extensions/flow/commands/
+cp -r commands/* ~/.gemini/extensions/flow/commands/
 ```
 
 ### Initialize a Project

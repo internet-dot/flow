@@ -274,7 +274,7 @@ Skills are available in `templates/skills/` for copying to `.gemini/skills/`:
 gemini install flow
 
 # Or copy manually
-cp -r templates/gemini/commands/* ~/.gemini/extensions/flow/commands/
+cp -r commands/* ~/.gemini/extensions/flow/commands/
 cp -r templates/skills ~/.gemini/skills/
 
 # Install Beads (required)
