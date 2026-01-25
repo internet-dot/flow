@@ -1,138 +1,100 @@
 ---
-description: Archive completed track and elevate patterns
-argument-hint: <track_id>
-allowed-tools: Read, Write, Edit, Bash, AskUserQuestion
+description: Archive a completed flow and elevate learnings
+argument-hint: <flow_id>
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebSearch
 ---
 
 # Flow Archive
 
-Archiving track: **$ARGUMENTS**
+Archiving flow: **$ARGUMENTS**
 
-## Phase 1: Verify Completion
+## Phase 1: Validation
 
-Check all tasks in plan.md are `[x]` or `[-]`.
-
-If incomplete tasks exist:
-> Track has {N} incomplete tasks. Archive anyway? (yes/no)
+1. **Resolve Flow ID:** If not provided, list completed flows from `.agent/flows.md` and ask user to select.
+2. **Verify Completion:** Read `.agent/specs/{flow_id}/plan.md`.
+   - If uncompleted tasks exist: "Warning: Flow has incomplete tasks. Continue? (y/n)" → Halt if 'n'.
 
 ---
 
 ## Phase 2: Pattern Elevation
 
-Read `.agent/specs/{track_id}/learnings.md`.
+1. Read `.agent/specs/{flow_id}/learnings.md`.
+2. Read `.agent/patterns.md`.
+3. Identify new patterns not present in global patterns.
+4. **Interactive Selection:**
+   - "Found these potential patterns:"
+   - [ ] Pattern 1
+   - [ ] Pattern 2
+   - "Select patterns to elevate (or 'all'/'none'):"
+5. **Merge:** Append selected patterns to `.agent/patterns.md`.
+   - Format: `- {new pattern} (from: {flow_id})`
 
-For each learning entry:
+---
 
-> **Elevate to patterns.md?**
+## Phase 3: Archive Artifacts
+
+1. Create `.agent/archive/` if missing.
+2. **Generate Summary:**
+   Create `.agent/archive/{flow_id}/summary.md`:
+   ```markdown
+   # Archive Summary: {flow_id}
+   **Archived:** {date}
+   **Status:** Complete
+   **Elevated Patterns:**
+   - {list elevated patterns}
+   ```
+3. **Move Directory:**
+   ```bash
+   mv .agent/specs/{flow_id} .agent/archive/{flow_id}
+   ```
+4. **Update Metadata:**
+   Update `.agent/archive/{flow_id}/metadata.json`:
+   - Set `"status": "archived"`
+   - Set `"archived_at": "{timestamp}"`
+
+---
+
+## Phase 4: Registry Update
+
+Edit `.agent/flows.md`:
+1. Find entry for `{flow_id}`.
+2. Move from "Active" section to "Archived" section.
+3. Update link to: `[./archive/{flow_id}/](./archive/{flow_id}/)`
+
+---
+
+## Phase 5: Beads Cleanup
+
+1. Get `beads_epic_id` from metadata.
+2. Close epic:
+   ```bash
+   bd close {epic_id} --reason "Flow archived"
+   ```
+
+---
+
+## Phase 6: Git Commit
+
+1. **Check Ignore Status:**
+   ```bash
+   git check-ignore .agent/
+   ```
+2. **Commit (if not ignored):**
+   ```bash
+   git add .agent/
+   git commit -m "flow(archive): {flow_id} complete"
+   ```
+   *If ignored, skip commit and notify user.*
+
+---
+
+## Phase 7: Completion
+
+> "Flow '{flow_id}' archived successfully.
 >
-> Learning: {description}
+> **Summary:**
+> - ID: {flow_id}
+> - Location: .agent/archive/{flow_id}/
+> - Patterns Elevated: {count}
 >
-> - Yes - Add to project patterns
-> - No - Track-specific only
-
----
-
-## Phase 3: Update patterns.md
-
-For elevated patterns, append to `.agent/patterns.md`:
-
-```markdown
-## Code Conventions
-
-- {new pattern} (from: {track_id})
-```
-
----
-
-## Phase 4: Generate Summary
-
-Create archive summary:
-
-```markdown
-# Archive Summary: {track_id}
-
-**Completed:** {date}
-**Duration:** {days from creation to completion}
-**Tasks:** {completed}/{total}
-
-## Key Accomplishments
-
-{list main deliverables}
-
-## Patterns Extracted
-
-{list patterns elevated to patterns.md}
-
-## Files Modified
-
-{list of files created/changed}
-
-## Commits
-
-{list of commit SHAs}
-```
-
----
-
-## Phase 5: Move to Archive
-
-```bash
-mv .agent/specs/{track_id} .agent/archive/{track_id}
-```
-
----
-
-## Phase 6: Update Registry
-
-In `.agent/prds.md`:
-- Change status: `[ ]` -> `[x]`
-- Add completion date
-
----
-
-## Phase 7: Beads Cleanup
-
-```bash
-bd close {epic_id} --reason "Archived"
-```
-
-If beads.json has `compactOnArchive: true`:
-```bash
-bd compact {epic_id}
-```
-
----
-
-## Phase 8: Final Commit
-
-```bash
-git add .agent/
-git commit -m "flow(archive): {track_id} complete"
-```
-
----
-
-## Final Summary
-
-```
-Track Archived
-
-ID: {track_id}
-Location: .agent/archive/{track_id}/
-Duration: {N} days
-
-Patterns Elevated: {count}
-Tasks Completed: {count}
-Commits: {count}
-
-Next: Start a new track with `/flow-newtrack`
-```
-
----
-
-## Critical Rules
-
-1. **VERIFY COMPLETION** - Warn if incomplete tasks
-2. **ELEVATE PATTERNS** - Don't lose learnings
-3. **PRESERVE HISTORY** - Move, don't delete
-4. **BEADS SYNC** - Close epic in Beads
+> Ready for next flow: `/flow-prd`"

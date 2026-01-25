@@ -14,9 +14,9 @@ git diff --stat HEAD~10
 - Rebuild `.agent/index.md`
 - Flag stale patterns in `.agent/patterns.md`
 
-## Phase 3: Track Sync
+## Phase 3: Flow Sync
 
-For each active track:
+For each active flow:
 - Verify affected files still exist
 - Update file paths if changed
 

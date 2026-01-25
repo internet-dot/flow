@@ -16,7 +16,7 @@
       "file": "./commands/flow-setup.md"
     },
     "flow:prd": {
-      "description": "Create new track with spec and plan",
+      "description": "Create new flow with spec and plan",
       "file": "./commands/flow-prd.md"
     },
     "flow:implement": {

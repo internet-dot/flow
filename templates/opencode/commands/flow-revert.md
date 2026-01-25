@@ -1,11 +1,11 @@
 # Flow Revert
 
-Git-aware revert of tracks, phases, or tasks.
+Git-aware revert of flows, phases, or tasks.
 
 ## Usage
 - `/flow:revert task` - Revert last task
 - `/flow:revert phase` - Revert current phase
-- `/flow:revert track {track_id}` - Revert entire track
+- `/flow:revert flow {flow_id}` - Revert entire flow
 
 ## Phase 1: Identify Scope
 
@@ -43,5 +43,5 @@ Revert Complete
 Commits Reverted: {count}
 Tasks Reset: {count}
 
-Resume with: /flow:implement {track_id}
+Resume with: /flow:implement {flow_id}
 ```

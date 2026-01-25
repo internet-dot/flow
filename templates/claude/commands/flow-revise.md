@@ -1,19 +1,19 @@
 ---
 description: Update spec or plan when implementation reveals issues
-argument-hint: <track_id>
+argument-hint: <flow_id>
 allowed-tools: Read, Write, Edit, Bash, AskUserQuestion
 ---
 
 # Flow Revise
 
-Revising track: **$ARGUMENTS**
+Revising flow: **$ARGUMENTS**
 
 ## Phase 1: Load Current State
 
 Read:
-- `.agent/specs/{track_id}/spec.md`
-- `.agent/specs/{track_id}/plan.md`
-- `.agent/specs/{track_id}/learnings.md`
+- `.agent/specs/{flow_id}/spec.md`
+- `.agent/specs/{flow_id}/plan.md`
+- `.agent/specs/{flow_id}/learnings.md`
 
 ---
 
@@ -53,7 +53,7 @@ Based on revision type:
 
 ## Phase 5: Log Revision
 
-Append to `.agent/specs/{track_id}/revisions.md`:
+Append to `.agent/specs/{flow_id}/revisions.md`:
 
 ```markdown
 ## [YYYY-MM-DD HH:MM] Revision {N}
@@ -83,8 +83,8 @@ bd update {affected_task_ids} --notes "Revised: {reason}"
 ## Phase 7: Commit Revision
 
 ```bash
-git add .agent/specs/{track_id}/
-git commit -m "flow(revise): {track_id} - {brief description}"
+git add .agent/specs/{flow_id}/
+git commit -m "flow(revise): {flow_id} - {brief description}"
 ```
 
 ---

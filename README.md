@@ -55,7 +55,7 @@ npm install -g beads-cli
 
 ```bash
 cp -r templates/claude/commands/* ~/.claude/commands/
-cp -r templates/skills/* ~/.claude/skills/
+cp -r skills/* ~/.claude/skills/
 ```
 
 ##### Codex CLI
@@ -63,8 +63,8 @@ cp -r templates/skills/* ~/.claude/skills/
 ```bash
 cp -r templates/codex/prompts/* ~/.codex/prompts/
 cat templates/codex/AGENTS.md >> ~/.codex/AGENTS.md
-cp -r templates/skills/flow ~/.codex/skills/
-cp -r templates/skills/beads ~/.codex/skills/
+cp -r skills/flow ~/.codex/skills/
+cp -r skills/beads ~/.codex/skills/
 ```
 
 ##### OpenCode
@@ -262,11 +262,11 @@ Consolidated in `patterns.md`:
 2. Log in `learnings.md`
 3. Phase completion → prompt for elevation
 4. Archive → extract to `patterns.md`
-5. New tracks → inherit patterns
+5. New flows → inherit patterns
 
 ## Skills Library
 
-Flow includes 50+ technology-specific skills in `templates/skills/`:
+Flow includes 50+ technology-specific skills in `skills/`:
 
 | Category | Skills |
 |----------|--------|

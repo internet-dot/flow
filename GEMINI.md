@@ -27,11 +27,11 @@ To find a file (e.g., "**Product Definition**") within a specific context:
 
 1. **Identify Index:** Determine the relevant index file:
     - **Project Context:** `.agent/index.md`
-    - **Track Context:**
-        a. Resolve and read the **Track Registry** (via Project Context)
-        b. Find the entry for the specific `<track_id>`
-        c. Follow the link to locate the track's folder. Index file is `<track_folder>/index.md`
-        d. **Fallback:** If not yet registered, use `<Track Directory>/<track_id>/index.md`
+    - **Flow Context:**
+        a. Resolve and read the **Flow Registry** (via Project Context)
+        b. Find the entry for the specific `<flow_id>`
+        c. Follow the link to locate the flow's folder. Index file is `<flow_folder>/index.md`
+        d. **Fallback:** If not yet registered, use `<Flow Directory>/<flow_id>/index.md`
 
 2. **Check Index:** Read the index file and look for a link with a matching label.
 
@@ -49,8 +49,8 @@ To find a file (e.g., "**Product Definition**") within a specific context:
 | **Tech Stack** | `.agent/tech-stack.md` |
 | **Workflow** | `.agent/workflow.md` |
 | **Product Guidelines** | `.agent/product-guidelines.md` |
-| **Track Registry** | `.agent/tracks.md` |
-| **Track Directory** | `.agent/specs/` |
+| **Flow Registry** | `.agent/flows.md` |
+| **Flow Directory** | `.agent/specs/` |
 | **Archive Directory** | `.agent/archive/` |
 | **Template Directory** | `.agent/templates/` |
 | **Code Styleguides Directory** | `.agent/code-styleguides/` |
@@ -59,23 +59,23 @@ To find a file (e.g., "**Product Definition**") within a specific context:
 | **Research Directory** | `.agent/research/` |
 | **Wisps Directory** | `.agent/wisps/` |
 
-**Standard Default Paths (Track):**
+**Standard Default Paths (Flow):**
 
 | Key | Default Path |
 |-----|--------------|
-| **Specification** | `.agent/specs/<track_id>/spec.md` |
-| **Implementation Plan** | `.agent/specs/<track_id>/plan.md` |
-| **Metadata** | `.agent/specs/<track_id>/metadata.json` |
-| **Learnings** | `.agent/specs/<track_id>/learnings.md` |
+| **Specification** | `.agent/specs/<flow_id>/spec.md` |
+| **Implementation Plan** | `.agent/specs/<flow_id>/plan.md` |
+| **Metadata** | `.agent/specs/<flow_id>/metadata.json` |
+| **Learnings** | `.agent/specs/<flow_id>/learnings.md` |
 
-## Track ID Naming Convention
+## Flow ID Naming Convention
 
 **Format:** `shortname_YYYYMMDD` (e.g., `user-auth_20260124`)
 
-- **Active Tracks:** Slug + date (e.g., `dark-mode_20260124`)
+- **Active Flows:** Slug + date (e.g., `dark-mode_20260124`)
   - Derived from description: lowercase, hyphens for spaces, max 3-4 words
   - Date suffix prevents collisions and aids chronological sorting
-- **Archived Tracks:** Keep same ID, moved to `.agent/archive/`
+- **Archived Flows:** Keep same ID, moved to `.agent/archive/`
 
 ## Task Status Markers
 
@@ -91,24 +91,24 @@ To find a file (e.g., "**Product Definition**") within a specific context:
 
 | Command | Purpose |
 |---------|---------|
-| `/flow:setup` | Initialize project with context files, Beads, and first track |
-| `/flow:prd` | Create PRD (track) with spec and plan |
+| `/flow:setup` | Initialize project with context files, Beads, and first flow |
+| `/flow:prd` | Create PRD (flow) with spec and plan |
 | `/flow:research` | Conduct pre-PRD research |
 | `/flow:docs` | Five-phase documentation workflow |
-| `/flow:implement` | Execute tasks from track's plan (TDD workflow) |
+| `/flow:implement` | Execute tasks from flow's plan (TDD workflow) |
 | `/flow:status` | Display progress overview with Beads status |
-| `/flow:revert` | Git-aware revert of tracks, phases, or tasks |
+| `/flow:revert` | Git-aware revert of flows, phases, or tasks |
 | `/flow:validate` | Validate project integrity and fix issues |
 | `/flow:block` | Mark task as blocked with reason |
 | `/flow:skip` | Skip current task with justification |
 | `/flow:revise` | Update spec/plan when implementation reveals issues |
-| `/flow:archive` | Archive completed tracks + elevate patterns |
+| `/flow:archive` | Archive completed flows + elevate patterns |
 | `/flow:export` | Generate project summary export |
 | `/flow:handoff` | Create context handoff for session transfer |
 | `/flow:refresh` | Sync context docs with current codebase state |
-| `/flow:formula` | List and manage track templates (Beads formulas) |
-| `/flow:wisp` | Create ephemeral exploration track (no audit trail) |
-| `/flow:distill` | Extract reusable template from completed track |
+| `/flow:formula` | List and manage flow templates (Beads formulas) |
+| `/flow:wisp` | Create ephemeral exploration flow (no audit trail) |
+| `/flow:distill` | Extract reusable template from completed flow |
 
 ## Beads Integration
 
@@ -140,7 +140,7 @@ Stealth mode keeps Beads data local-only (not committed to git).
   "epicPrefix": "flow",
   "autoCreateTasks": true,
   "autoSyncOnComplete": true,
-  "compactOnArchive": true,
+  "compactOnArchive": false,
   "taskStatusMapping": {
     "pending": "[ ]",
     "in_progress": "[~]",
@@ -155,7 +155,7 @@ Stealth mode keeps Beads data local-only (not committed to git).
 
 | Flow Action | Beads Command |
 |-------------|---------------|
-| Create track | `bd create "Track: {track_id}" -t epic -p 1` |
+| Create flow | `bd create "Flow: {flow_id}" -t epic -p 1` |
 | Create task | `bd create "{task}" --parent {epic_id} -p 1` |
 | Start task | `bd update {id} --status in_progress` |
 | Complete task | `bd close {id} --reason "commit: {sha}"` |
@@ -182,7 +182,7 @@ bd sync
 
 ## Learnings System (Ralph-style)
 
-### Per-Track (`learnings.md`)
+### Per-Flow (`learnings.md`)
 Append-only log of discoveries:
 ```markdown
 ## [2026-01-24 14:30] - Phase 1 Task 2: Add auth middleware
@@ -194,7 +194,7 @@ Append-only log of discoveries:
 ```
 
 ### Project-Level (`patterns.md`)
-Consolidated patterns from all tracks:
+Consolidated patterns from all flows:
 ```markdown
 # Code Conventions
 - Import order: external → internal → types
@@ -211,10 +211,10 @@ Consolidated patterns from all tracks:
 
 ### Knowledge Flywheel
 1. Implement → discover patterns
-2. Log in track `learnings.md` (sync to Beads notes)
+2. Log in flow `learnings.md` (sync to Beads notes)
 3. Phase completion → prompt pattern elevation
-4. Track completion → extract to `patterns.md`
-5. New tracks → pre-load `patterns.md` context
+4. Flow completion → extract to `patterns.md`
+5. New flows → pre-load `patterns.md` context
 
 ## Parallel Execution
 
@@ -253,13 +253,13 @@ State tracked in `parallel_state.json`. Uses Claude's Task Tool to spawn sub-age
 At phase completion:
 1. Run full test suite
 2. Verify coverage requirements
-3. Create git tag: `checkpoint/{track_id}/phase-{N}`
+3. Create git tag: `checkpoint/{flow_id}/phase-{N}`
 4. Prompt for pattern elevation
 5. Manual verification with user
 
 ## Skills
 
-Skills are available in `templates/skills/` for copying to `.gemini/skills/`:
+Skills are available in `skills/` for copying to `.gemini/skills/`:
 
 | Skill | Purpose |
 |-------|---------|
@@ -275,7 +275,7 @@ gemini install flow
 
 # Or copy manually
 cp -r commands/* ~/.gemini/extensions/flow/commands/
-cp -r templates/skills ~/.gemini/skills/
+cp -r skills ~/.gemini/skills/
 
 # Install Beads (required)
 npm install -g beads-cli

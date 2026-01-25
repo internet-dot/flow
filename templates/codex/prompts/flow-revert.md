@@ -1,32 +1,32 @@
 # Flow Revert
 
-Git-aware revert of tracks, phases, or tasks.
+Git-aware revert of flows, phases, or tasks.
 
 ## Usage
 - `/flow:revert task` - Revert last task
 - `/flow:revert phase` - Revert current phase
-- `/flow:revert track {track_id}` - Revert entire track
+- `/flow:revert flow {flow_id}` - Revert entire flow
 
 ## Phase 1: Identify Scope
 
 ### 1.1 Read Current State
 ```bash
-cat .agent/specs/{track_id}/implement_state.json
+cat .agent/specs/{flow_id}/implement_state.json
 ```
 
 ### 1.2 Gather Commits
 For task: last commit
 For phase: all commits in current phase
-For track: all commits since track started
+For flow: all commits since flow started
 
 ```bash
-git log --oneline --since="{track_start_date}"
+git log --oneline --since="{flow_start_date}"
 ```
 
 ## Phase 2: Confirm Revert
 
 ```
-Revert Scope: {task|phase|track}
+Revert Scope: {task|phase|flow}
 
 Commits to revert:
 - abc1234: feat(auth): add login endpoint
@@ -82,5 +82,5 @@ Revert Commit: {new_sha}
 Plan updated: {count} tasks reset to pending
 Beads updated: {count} tasks reopened
 
-Resume with: /flow:implement {track_id}
+Resume with: /flow:implement {flow_id}
 ```

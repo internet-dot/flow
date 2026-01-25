@@ -1,14 +1,14 @@
 # Flow Implement
 
-Execute tasks from a track's plan using TDD workflow.
+Execute tasks from a flow's plan using TDD workflow.
 
 ## Usage
-`/flow:implement {track_id}` or `/flow:implement` (uses current track)
+`/flow:implement {flow_id}` or `/flow:implement` (uses current flow)
 
-## Phase 1: Load Track Context
+## Phase 1: Load Flow Context
 
-1. Read `.agent/specs/{track_id}/plan.md`
-2. Read `.agent/specs/{track_id}/spec.md`
+1. Read `.agent/specs/{flow_id}/plan.md`
+2. Read `.agent/specs/{flow_id}/spec.md`
 3. Read `.agent/patterns.md`
 4. Load Beads context: `bd prime`
 
@@ -16,7 +16,7 @@ Execute tasks from a track's plan using TDD workflow.
 
 ### 2.1 Check for Resume State
 ```bash
-cat .agent/specs/{track_id}/implement_state.json 2>/dev/null
+cat .agent/specs/{flow_id}/implement_state.json 2>/dev/null
 ```
 
 ### 2.2 Find Next Task
@@ -71,7 +71,7 @@ bd close {task_id} --reason "commit: {sha}"
 ```
 
 ### 5.3 Log Learnings
-Add discoveries to `.agent/specs/{track_id}/learnings.md`
+Add discoveries to `.agent/specs/{flow_id}/learnings.md`
 
 ## Phase 6: Continue or Stop
 

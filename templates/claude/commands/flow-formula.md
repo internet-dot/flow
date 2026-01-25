@@ -1,12 +1,12 @@
 ---
-description: List and manage track templates (Beads formulas)
+description: List and manage flow templates (Beads formulas)
 argument-hint: [list|pour|distill] [template_name]
 allowed-tools: Read, Write, Glob, Bash
 ---
 
 # Flow Formula
 
-Managing Beads track templates (formulas).
+Managing Beads flow templates (formulas).
 
 ## Commands
 
@@ -26,15 +26,15 @@ Lists available templates from:
 /flow-formula pour {template_name}
 ```
 
-Creates a new track from a template.
+Creates a PRD from a template.
 
 ### Distill Template
 
 ```bash
-/flow-formula distill {track_id} {template_name}
+/flow-formula distill {flow_id} {template_name}
 ```
 
-Extracts a reusable template from an existing track.
+Extracts a reusable template from an existing flow.
 
 ---
 
@@ -81,7 +81,7 @@ bd mol pour {template_name}
 ```
 
 Then customize:
-1. Generate track_id
+1. Generate flow_id
 2. Replace template placeholders
 3. Create Beads epic and tasks
 4. Register in prds.md
@@ -90,7 +90,7 @@ Then customize:
 
 ## Phase 4: Distill Action
 
-1. Read track's spec.md and plan.md
+1. Read flow's spec.md and plan.md
 2. Abstract into template:
    - Replace specific names with placeholders
    - Generalize tasks

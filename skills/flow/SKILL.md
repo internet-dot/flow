@@ -9,15 +9,15 @@ description: "Context-driven development workflow with Beads integration. Auto-a
 
 This skill activates when:
 - `.agent/` directory exists in the project root
-- User mentions "flow", "track", "spec", "plan", or "implement"
+- User mentions "flow", "flow", "spec", "plan", or "implement"
 - User invokes `/flow-*` commands
 
 ## Core Concepts
 
-### Tracks (formerly PRDs)
-A track is a logical unit of work (feature or bug fix). Each track has:
+### Flows (formerly PRDs)
+A flow is a logical unit of work (feature or bug fix). Each flow has:
 - **ID format**: `shortname_YYYYMMDD` (e.g., `auth_20260124`)
-- **Location**: `.agent/specs/{track_id}/`
+- **Location**: `.agent/specs/{flow_id}/`
 - **Files**: spec.md, plan.md, metadata.json, learnings.md
 
 ### Status Markers
@@ -29,7 +29,7 @@ A track is a logical unit of work (feature or bug fix). Each track has:
 
 ### Beads Integration (Required)
 Flow requires Beads for persistent cross-session memory:
-- Each track becomes a Beads epic
+- Each flow becomes a Beads epic
 - Tasks sync bidirectionally
 - Notes survive context compaction
 - Run `bd prime` at session start
@@ -39,8 +39,8 @@ Flow requires Beads for persistent cross-session memory:
 **To locate files within Flow context:**
 
 1. **Project Index**: `.agent/index.md`
-2. **Specs Registry**: `.agent/prds.md` (or tracks.md)
-3. **Track Index**: `.agent/specs/{track_id}/index.md`
+2. **Specs Registry**: `.agent/prds.md` (or flows.md)
+3. **Flow Index**: `.agent/specs/{flow_id}/index.md`
 
 **Default Paths:**
 - Product: `.agent/product.md`
@@ -54,7 +54,7 @@ Flow requires Beads for persistent cross-session memory:
 | Claude Code | Gemini CLI | Purpose |
 |-------------|------------|---------|
 | `/flow-setup` | `/flow:setup` | Initialize project with context files |
-| `/flow-newtrack` | `/flow:newtrack` | Create feature/bug track |
+| `/flow-prd` | `/flow:prd` | Create feature/bug flow |
 | `/flow-implement` | `/flow:implement` | Execute tasks (TDD workflow) |
 | `/flow-status` | `/flow:status` | Display progress overview |
 | `/flow-revert` | `/flow:revert` | Git-aware revert |
@@ -62,12 +62,12 @@ Flow requires Beads for persistent cross-session memory:
 | `/flow-block` | `/flow:block` | Mark task blocked |
 | `/flow-skip` | `/flow:skip` | Skip task with reason |
 | `/flow-revise` | `/flow:revise` | Update spec/plan mid-work |
-| `/flow-archive` | `/flow:archive` | Archive completed track |
+| `/flow-archive` | `/flow:archive` | Archive completed flow |
 | `/flow-export` | `/flow:export` | Generate summary export |
 | `/flow-handoff` | `/flow:handoff` | Context handoff for sections |
 | `/flow-refresh` | `/flow:refresh` | Sync context with codebase |
 | `/flow-formula` | `/flow:formula` | Manage Beads templates |
-| `/flow-wisp` | `/flow:wisp` | Ephemeral exploration track |
+| `/flow-wisp` | `/flow:wisp` | Ephemeral exploration flow |
 | `/flow-distill` | `/flow:distill` | Extract reusable template |
 
 ## Task Workflow (TDD)
@@ -86,10 +86,10 @@ Flow requires Beads for persistent cross-session memory:
 ## Knowledge Flywheel
 
 1. **Implement** - Discover patterns while coding
-2. **Log** - Record in track's `learnings.md`
+2. **Log** - Record in flow's `learnings.md`
 3. **Sync** - Auto-sync to Beads notes
-4. **Elevate** - At phase/track completion, elevate to `patterns.md`
-5. **Prime** - New tracks inherit from `patterns.md`
+4. **Elevate** - At phase/flow completion, elevate to `patterns.md`
+5. **Prime** - New flows inherit from `patterns.md`
 
 ## Phase Completion Protocol
 

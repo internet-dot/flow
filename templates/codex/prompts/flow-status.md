@@ -1,10 +1,10 @@
 # Flow Status
 
-Display progress overview for all active tracks.
+Display progress overview for all active flows.
 
 ## Phase 1: Load Registry
 
-Read `.agent/tracks.md` to get list of active tracks.
+Read `.agent/flows.md` to get list of active flows.
 
 ## Phase 2: Beads Status
 
@@ -14,11 +14,11 @@ bd ready
 bd blocked
 ```
 
-## Phase 3: Track Summary
+## Phase 3: Flow Summary
 
-For each active track:
+For each active flow:
 
-1. Read `.agent/specs/{track_id}/plan.md`
+1. Read `.agent/specs/{flow_id}/plan.md`
 2. Count tasks by status: `[ ]`, `[~]`, `[x]`, `[!]`, `[-]`
 3. Calculate progress percentage
 
@@ -27,7 +27,7 @@ For each active track:
 ```
 Flow Status Dashboard
 
-=== Active Tracks ===
+=== Active Flows ===
 
 [~] auth_20260124 - Add user authentication
     Progress: 5/12 tasks (41%)
@@ -58,5 +58,5 @@ Coverage: 82%
 Based on status, suggest next action:
 
 - If blocked: "Run `/flow:block` to document blockers"
-- If no in-progress: "Run `/flow:implement {track_id}`"
-- If complete: "Run `/flow:archive {track_id}`"
+- If no in-progress: "Run `/flow:implement {flow_id}`"
+- If complete: "Run `/flow:archive {flow_id}`"

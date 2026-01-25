@@ -100,7 +100,7 @@ All tasks follow a strict lifecycle:
 1. **Capture** - After each task, append learnings to track's `learnings.md`
 2. **Elevate** - At phase/track completion, move reusable patterns to `.agent/patterns.md`
 3. **Archive** - Track is archived; patterns remain in `.agent/patterns.md`
-4. **Inherit** - New tracks read `.agent/patterns.md` to prime context
+4. **Inherit** - New flows read `.agent/patterns.md` to prime context
 
 **Important:** `.agent/patterns.md` is NOT archived with tracks. It remains at the top level as persistent project knowledge.
 

@@ -3,14 +3,14 @@ prompt = """
 ## SYSTEM DIRECTIVE
 You are skipping a task. This requires a justification and updates to both plan and Beads.
 
-**Input:** $ARGUMENTS (format: <track_id> <task_number> "<reason>")
+**Input:** $ARGUMENTS (format: <flow_id> <task_number> "<reason>")
 
 ---
 
 ## Phase 1: Parse Arguments
 
 Extract from $ARGUMENTS:
-- track_id
+- flow_id
 - task_number
 - reason (in quotes)
 
@@ -18,9 +18,9 @@ If arguments are missing, ask user for them.
 
 ---
 
-## Phase 2: Verify Track
+## Phase 2: Verify Flow
 
-1. Read `.agent/specs/{track_id}/plan.md`
+1. Read `.agent/specs/{flow_id}/plan.md`
 2. Find task {task_number}
 3. Verify task exists and is not completed
 
@@ -53,7 +53,7 @@ bd update {task_id} --status skipped --notes "Skipped: {reason}"
 
 ## Phase 6: Log Skip
 
-Append to `.agent/specs/{track_id}/skipped.md`:
+Append to `.agent/specs/{flow_id}/skipped.md`:
 
 ```markdown
 ## [YYYY-MM-DD HH:MM] Task {N}: {description}
@@ -71,7 +71,7 @@ Create skipped.md if it doesn't exist.
 ```
 Task Skipped
 
-Track: {track_id}
+Flow: {flow_id}
 Task: {N}. {description}
 Reason: {reason}
 
@@ -79,7 +79,7 @@ Reason: {reason}
 WARNING: The following tasks depend on this skipped task:
 - Task {M}: {description}
 
-Plan updated: .agent/specs/{track_id}/plan.md
+Plan updated: .agent/specs/{flow_id}/plan.md
 Beads updated: Yes
 Logged: skipped.md
 ```

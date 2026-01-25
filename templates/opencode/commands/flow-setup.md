@@ -60,7 +60,7 @@ Create `.agent/beads.json` configuration.
 
 Create:
 - `.agent/index.md` - File resolution index
-- `.agent/tracks.md` - Empty track registry
+- `.agent/flows.md` - Empty flow registry
 - `.agent/patterns.md` - Empty patterns template
 
 ## Phase 6: Save State
@@ -85,6 +85,6 @@ Beads Mode: stealth
 
 Next Steps:
 1. Run `bd prime` to load Beads context
-2. Run `/flow:prd "description"` to create your first track
-3. Run `/flow:implement {track_id}` to start coding
+2. Run `/flow:prd "description"` to create your first flow
+3. Run `/flow:implement {flow_id}` to start coding
 ```

@@ -1,137 +1,56 @@
-description = "Create ephemeral exploration track (no audit trail)"
+description = "Create a new ephemeral wisp (mini-track) for quick tasks"
 prompt = """
-## SYSTEM DIRECTIVE
-You are creating a "wisp" - an ephemeral exploration track with no audit trail. Wisps are for quick experiments and proofs of concept.
+## 1.0 SYSTEM DIRECTIVE
+You are an AI agent assistant for the Flow framework. Your task is to create a "Wisp" - a lightweight, ephemeral track for quick tasks, explorations, or experiments that don't need a full PRD.
 
-**Input:** $ARGUMENTS (description of exploration)
-
----
-
-## Phase 1: Create Wisp
-
-```bash
-bd mol wisp "{description}"
-```
-
-Extract wisp_id from output.
+**Input:** $ARGUMENTS (description)
 
 ---
 
-## Phase 2: Create Wisp Directory
-
-```bash
-mkdir -p .agent/wisps/{wisp_id}
-```
-
-Create minimal files:
-
-`.agent/wisps/{wisp_id}/notes.md`:
-```markdown
-# Wisp: {description}
-
-**Created:** {timestamp}
-**Status:** Active
-
-## Purpose
-{what you're exploring}
-
-## Notes
-{scratch notes go here}
-```
-
-`.agent/wisps/{wisp_id}/findings.md`:
-```markdown
-# Findings: {description}
-
-## What Worked
-{list what worked}
-
-## What Didn't Work
-{list what failed}
-
-## Conclusions
-{key takeaways}
-```
+## 1.1 INITIALIZATION
+1.  **Parse Input:** Get description from arguments. If missing, ask: "What is the goal of this wisp?"
+2.  **Generate ID:** Create `wisp_id` format: `wisp_YYYYMMDD_shortname` (e.g., `wisp_20231027_fix_login`).
 
 ---
 
-## Phase 3: Announce Wisp
+## 2.0 CREATION
+1.  **Create Directory:**
+    ```bash
+    mkdir -p .agent/wisps/{wisp_id}
+    ```
+2.  **Create Context File:**
+    Create `.agent/wisps/{wisp_id}/wisp.md`:
+    ```markdown
+    # Wisp: {description}
 
-```
-Wisp Created
+    **ID:** {wisp_id}
+    **Created:** {timestamp}
+    **Status:** Active
 
-ID: {wisp_id}
-Location: .agent/wisps/{wisp_id}/
-Beads: Ephemeral (no audit trail)
+    ## Goal
+    {description}
 
-This is an exploration track with:
-- No TDD required
-- No commit conventions
-- No coverage requirements
-- Freedom to experiment
-
-When done, choose an ending:
-- `/flow:wisp promote {wisp_id}` - Convert to real track
-- `/flow:wisp discard {wisp_id}` - Delete everything
-- `/flow:wisp keep {wisp_id}` - Keep findings only
-```
-
----
-
-## Resolution: PROMOTE
-
-If $ARGUMENTS contains "promote {wisp_id}":
-
-1. Read findings.md
-2. Create new track: `/flow:newtrack "{description}"`
-3. Copy findings to new track's learnings.md
-4. Delete wisp directory and Beads entry
+    ## Scratchpad
+    - [ ] Explore...
+    - [ ] Try...
+    ```
 
 ---
 
-## Resolution: DISCARD
-
-If $ARGUMENTS contains "discard {wisp_id}":
-
-1. Confirm with user:
-   > Discard wisp {wisp_id}? All code changes will be lost. (yes/no)
-
-2. If confirmed:
-   ```bash
-   rm -rf .agent/wisps/{wisp_id}
-   bd mol discard {wisp_id}
-   git checkout .  # Discard code changes
-   ```
-
-3. Report: "Wisp discarded. All changes reverted."
+## 3.0 BEADS SYNC (Optional)
+Ask user: "Do you want to track this in Beads? (y/n)"
+*   **If Yes:**
+    ```bash
+    bd create "Wisp: {description}" -t task -p 2 --json
+    ```
+    Store ID in `wisp.md`.
 
 ---
 
-## Resolution: KEEP
+## 4.0 COMPLETION
+Announce:
+"Wisp created: {wisp_id}
+Location: .agent/wisps/{wisp_id}/wisp.md
 
-If $ARGUMENTS contains "keep {wisp_id}":
-
-1. Move findings to research:
-   ```bash
-   mkdir -p .agent/research
-   mv .agent/wisps/{wisp_id}/findings.md .agent/research/wisp_{wisp_id}_findings.md
-   ```
-
-2. Clean up:
-   ```bash
-   rm -rf .agent/wisps/{wisp_id}
-   bd mol discard {wisp_id}
-   git checkout .  # Discard code changes
-   ```
-
-3. Report: "Findings preserved in .agent/research/. Code changes discarded."
-
----
-
-## Critical Rules
-
-1. **NO AUDIT** - Wisps don't create permanent records
-2. **LOW CEREMONY** - Minimal process
-3. **EXPLICIT ENDING** - Must choose promote, discard, or keep
-4. **WARN ABOUT CODE** - Discard reverts all code changes
+You can edit the scratchpad directly. When done, you can delete the folder or promote it to a full flow."
 """

@@ -31,11 +31,11 @@ Check Beads is operational.
 
 ---
 
-## Phase 3: Track Consistency
+## Phase 3: Flow Consistency
 
-For each track in `.agent/prds.md`:
+For each flow in `.agent/prds.md`:
 
-1. Verify directory exists: `.agent/specs/{track_id}/`
+1. Verify directory exists: `.agent/specs/{flow_id}/`
 2. Verify required files: spec.md, plan.md, metadata.json
 3. Verify Beads epic exists
 4. Check task count matches plan
@@ -66,7 +66,7 @@ Flow Validation Report
 [x] .agent/ directory complete
 [x] Beads initialized
 
-=== Tracks ===
+=== Flows ===
 [x] auth_20260124: 12 tasks, 5 complete
 [!] dark-mode_20260124: Missing spec.md
 

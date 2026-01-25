@@ -1,6 +1,6 @@
 ---
-description: Git-aware revert of tracks, phases, or tasks
-argument-hint: <track_id|phase|task> [target]
+description: Git-aware revert of flows, phases, or tasks
+argument-hint: <flow_id|phase|task> [target]
 allowed-tools: Read, Write, Edit, Bash
 ---
 
@@ -11,9 +11,9 @@ Reverting: **$ARGUMENTS**
 ## Phase 1: Parse Target
 
 Determine revert scope:
-- `track {track_id}` - Revert entire track
-- `phase {track_id} {N}` - Revert phase N
-- `task {track_id} {N}` - Revert single task
+- `flow {flow_id}` - Revert entire flow
+- `phase {flow_id} {N}` - Revert phase N
+- `task {flow_id} {N}` - Revert single task
 
 ---
 
@@ -22,7 +22,7 @@ Determine revert scope:
 Use git notes to find related commits:
 
 ```bash
-git log --notes --grep="track.*{track_id}" --oneline
+git log --notes --grep="flow.*{flow_id}" --oneline
 ```
 
 For phase/task, filter by specific markers.

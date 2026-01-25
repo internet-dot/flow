@@ -18,7 +18,7 @@ Create `.agent/handoff.md`:
 # Session Handoff
 
 **Generated:** {timestamp}
-**Track:** {track_id}
+**Flow:** {flow_id}
 **Task:** {current_task}
 
 ## What I Was Working On
@@ -35,7 +35,7 @@ Create `.agent/handoff.md`:
 ## Commands to Resume
 ```bash
 bd prime
-/flow:implement {track_id}
+/flow:implement {flow_id}
 ```
 ```
 

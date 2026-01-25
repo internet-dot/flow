@@ -76,9 +76,9 @@ flow/
 
 | Skill | Location | Purpose |
 |-------|----------|---------|
-| **flow** | `templates/skills/flow/` | Auto-activates when `.agent/` exists. Provides intent mapping and workflow guidance. |
-| **beads** | `templates/skills/beads/` | Auto-activates when `.beads/` exists. Provides persistent memory across sessions. |
-| **50+ tech skills** | `templates/skills/*/` | Technology-specific skills (React, Rust, Litestar, SQLSpec, etc.) |
+| **flow** | `skills/flow/` | Auto-activates when `.agent/` exists. Provides intent mapping and workflow guidance. |
+| **beads** | `skills/beads/` | Auto-activates when `.beads/` exists. Provides persistent memory across sessions. |
+| **50+ tech skills** | `skills/*/` | Technology-specific skills (React, Rust, Litestar, SQLSpec, etc.) |
 
 ### Generated Artifacts (in user projects)
 
@@ -184,7 +184,7 @@ bd prime                              # Load context for session
 2. Log in track `learnings.md` (auto-sync to Beads notes)
 3. At phase/track completion → prompt for pattern elevation
 4. Archive track → extract remaining patterns to `patterns.md`
-5. New tracks → inherit patterns from `patterns.md`
+5. New flows → inherit patterns from `patterns.md`
 
 ### Parallel Execution
 
@@ -232,7 +232,7 @@ The installer detects installed CLIs, backs up existing configs, and merges inte
 
 ```bash
 cp -r templates/claude/commands/* ~/.claude/commands/
-cp -r templates/skills/* ~/.claude/skills/
+cp -r skills/* ~/.claude/skills/
 ```
 
 #### Codex CLI
@@ -240,8 +240,8 @@ cp -r templates/skills/* ~/.claude/skills/
 ```bash
 cp -r templates/codex/prompts/* ~/.codex/prompts/
 cat templates/codex/AGENTS.md >> ~/.codex/AGENTS.md
-cp -r templates/skills/flow ~/.codex/skills/
-cp -r templates/skills/beads ~/.codex/skills/
+cp -r skills/flow ~/.codex/skills/
+cp -r skills/beads ~/.codex/skills/
 ```
 
 #### OpenCode

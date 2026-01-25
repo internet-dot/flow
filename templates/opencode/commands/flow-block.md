@@ -20,7 +20,7 @@ bd update {task_id} --status blocked --notes "{reason}"
 ```
 
 ### 2.3 Log to Blockers File
-Append to `.agent/specs/{track_id}/blockers.md`
+Append to `.agent/specs/{flow_id}/blockers.md`
 
 ## Phase 3: Suggest Next Actions
 

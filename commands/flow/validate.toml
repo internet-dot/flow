@@ -1,7 +1,7 @@
 description = "Validate Flow project integrity and optionally fix issues"
 prompt = """
 ## SYSTEM DIRECTIVE
-You are validating a Flow project's integrity. Check all files, Beads status, and track consistency.
+You are validating a Flow project's integrity. Check all files, Beads status, and flow consistency.
 
 ---
 
@@ -14,7 +14,7 @@ Verify required files exist:
    - `.agent/tech-stack.md`
    - `.agent/workflow.md`
    - `.agent/beads.json`
-   - `.agent/prds.md`
+   - `.agent/flows.md`
    - `.agent/patterns.md`
 
 2. **Beads Directory:**
@@ -34,16 +34,16 @@ Report any Beads errors.
 
 ---
 
-## Phase 3: Track Consistency
+## Phase 3: Flow Consistency
 
-For each track in `.agent/prds.md`:
+For each flow in `.agent/flows.md`:
 
-1. Verify directory exists: `.agent/specs/{track_id}/`
+1. Verify directory exists: `.agent/specs/{flow_id}/`
 2. Verify required files:
    - spec.md
    - plan.md
    - metadata.json
-3. Check if Beads epic exists for track
+3. Check if Beads epic exists for flow
 4. Verify task count matches plan
 
 ---
@@ -68,9 +68,9 @@ Flow Validation Report
 [x] .agent/ directory complete
 [x] Beads initialized
 
-=== Tracks ===
-[x] {track_id}: {task_count} tasks, {complete_count} complete
-[!] {track_id}: Missing required file
+=== Flows ===
+[x] {flow_id}: {task_count} tasks, {complete_count} complete
+[!] {flow_id}: Missing required file
 
 === Issues Found ===
 1. {issue description}

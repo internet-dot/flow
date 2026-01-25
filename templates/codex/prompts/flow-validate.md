@@ -13,12 +13,12 @@ Check existence of:
 - `.agent/tech-stack.md`
 - `.agent/workflow.md`
 - `.agent/patterns.md`
-- `.agent/tracks.md`
+- `.agent/flows.md`
 - `.agent/beads.json`
 
-### 1.2 Track Directories
-For each track in `.agent/tracks.md`:
-- Verify `.agent/specs/{track_id}/` exists
+### 1.2 Flow Directories
+For each flow in `.agent/flows.md`:
+- Verify `.agent/specs/{flow_id}/` exists
 - Check for `spec.md`, `plan.md`, `metadata.json`
 
 ## Phase 2: Beads Validation
@@ -28,7 +28,7 @@ bd status
 ```
 
 ### 2.1 Epic Sync
-Verify each track has corresponding Beads epic.
+Verify each flow has corresponding Beads epic.
 
 ### 2.2 Task Sync
 Check plan.md status matches Beads status.

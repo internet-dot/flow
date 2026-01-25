@@ -1,16 +1,16 @@
 ---
-description: Create ephemeral exploration track (no audit trail)
+description: Create ephemeral exploration flow (no audit trail)
 argument-hint: <description>
 allowed-tools: Read, Write, Bash
 ---
 
 # Flow Wisp
 
-Creating ephemeral exploration track: **$ARGUMENTS**
+Creating ephemeral exploration flow: **$ARGUMENTS**
 
 ## Overview
 
-A "wisp" is a lightweight, temporary track for:
+A "wisp" is a lightweight, temporary flow for:
 - Proof of concept exploration
 - Quick experiments
 - Research spikes
@@ -57,15 +57,15 @@ When done, choose:
 
 > **What do you want to do with this wisp?**
 >
-> - **Promote** - Convert to a real track (preserves learnings)
+> - **Promote** - Convert to a real flow (preserves learnings)
 > - **Discard** - Delete everything
 > - **Keep Notes** - Delete code, keep findings.md
 
 ### Promote
 
 ```bash
-/flow-newtrack "{description}"
-# Copy findings to new track's learnings.md
+/flow-prd "{description}"
+# Copy findings to PRD's learnings.md
 ```
 
 ### Discard
@@ -94,13 +94,13 @@ Wisp Created
 ID: {wisp_id}
 Location: .agent/wisps/{wisp_id}/
 
-This is an ephemeral exploration track.
+This is an ephemeral exploration flow.
 - No audit trail
 - No TDD required
 - Explore freely
 
 When done:
-- /flow-wisp promote {wisp_id} - Convert to real track
+- /flow-wisp promote {wisp_id} - Convert to real flow
 - /flow-wisp discard {wisp_id} - Delete everything
 - /flow-wisp keep {wisp_id} - Keep notes only
 ```

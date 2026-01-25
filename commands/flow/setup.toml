@@ -78,6 +78,7 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
     - `specs/archive/`
     - `.agent/specs/active/` (if different root)
     - `.agent/specs/archive/`
+    - `.agent/specs/` (current location)
 
     For each discovered spec directory, present:
     > "Found [N] specs in legacy locations:
@@ -100,9 +101,9 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
     b. Read `spec.md` and `plan.md`
     c. Read `learnings.md` if exists
     d. Check if referenced files still exist in codebase
-    e. Copy to `.agent/specs/{track_id}/`
-    f. Update `.agent/tracks.md` registry
-    g. Create Beads epic: `bd create "Track: {track_id}" -t epic -p 2`
+    e. Copy to `.agent/specs/{flow_id}/` (Rename directory if needed)
+    f. Update `.agent/flows.md` registry
+    g. Create Beads epic: `bd create "Flow: {flow_id}" -t epic -p 2 --description "{flow_description}" --notes "Created by Flow during setup"`
 
 3.  **Learnings Ingestion with Validation:**
     For each spec with learnings.md:
@@ -532,7 +533,7 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
       "epicPrefix": "flow",
       "autoCreateTasks": true,
       "autoSyncOnComplete": true,
-      "compactOnArchive": true,
+      "compactOnArchive": false,
       "taskStatusMapping": {
         "pending": "[ ]",
         "in_progress": "[~]",
@@ -562,9 +563,9 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
         - [Patterns](./patterns.md)
 
         ## Management
-        - [Track Registry](./tracks.md)
-        - [Track Specifications](./specs/)
-        - [Archived Tracks](./archive/)
+        - [Flow Registry](./flows.md)
+        - [Flow Specifications](./specs/)
+        - [Archived Flows](./archive/)
 
         ## Persistence
         - [Beads Config](./beads.json)
@@ -580,7 +581,7 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
         ```markdown
         # Project Patterns
 
-        > Consolidated learnings and patterns from all tracks.
+        > Consolidated learnings and patterns from all flows.
         > This file is the single source of truth for project conventions.
 
         ## Code Conventions
@@ -607,13 +608,13 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
         - {Important context}
         ```
 
-4.  **Create tracks.md:**
-    -   Create `.agent/tracks.md` with initial structure:
+4.  **Create flows.md:**
+    -   Create `.agent/flows.md` with initial structure:
         ```markdown
-        # Track Registry
+        # Flow Registry
 
-        This file tracks all tracks (features, bugs, refactors) for the project.
-        Each track has its own detailed spec and plan in its respective folder.
+        This file tracks all flows (features, bugs, refactors) for the project.
+        Each flow has its own detailed spec and plan in its respective folder.
 
         ---
         ```
@@ -675,16 +676,16 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
 
 ### 3.3 Convert the Initial PRD into Artifacts (Automated)
 1.  **State Your Goal:** Once the PRD is approved, announce that you will now create the artifacts for this initial PRD.
-2.  **Initialize PRD Registry File:** Create the `<root_directory>/prds.md` file with the initial header and the first PRD:
+2.  **Initialize Flow Registry File:** Create the `<root_directory>/flows.md` file with the initial header and the first PRD:
     ```markdown
-    # PRD Registry
+    # Flow Registry
 
     This file tracks all PRDs (Product Requirements Documents) for the project. Each PRD has its own detailed plan in its respective folder.
 
     ---
 
-    ## [ ] PRD: <PRD Description>
-    *Link: [./<prd_id>/](./<prd_id>/)*
+    ## [ ] Flow: <PRD Description>
+    *Link: [./specs/<flow_id>/](./specs/<flow_id>/)*
     ```
 3.  **Generate PRD Artifacts:**
     a. **Define PRD:** The approved title is the PRD description.
@@ -697,17 +698,17 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
                 - Sub-task: `    - [ ] ...`
             - **CRITICAL: Inject Phase Completion Tasks.** You MUST read the `<root_directory>/workflow.md` file to determine if a "Phase Completion Verification and Checkpointing Protocol" is defined. If this protocol exists, then for each **Phase** that you generate in `plan.md`, you MUST append a final meta-task to that phase. The format for this meta-task is: `- [ ] Task: Flow - User Manual Verification '<Phase Name>' (Protocol in workflow.md)`. You MUST replace `<Phase Name>` with the actual name of the phase.
     c. **Create PRD Artifacts:**
-        i. **Generate and Store PRD ID:** Create a unique PRD ID from the PRD description using a simple slug format:
+        i. **Generate and Store Flow ID:** Create a unique Flow ID from the PRD description using a simple slug format:
             - Convert to lowercase
             - Replace spaces with hyphens
             - Remove special characters
             - Example: "Add User Authentication" -> `user-auth`
             You MUST use this exact same ID for all subsequent steps for this PRD.
-        ii. **Create Single Directory:** Resolve the **PRD Directory** via the **Universal File Resolution Protocol** and create a single new directory: `<root_directory>/<prd_id>/`.
-        iii. **Create `metadata.json`:** In the new directory, create a `metadata.json` file with the correct structure and content, using the stored PRD ID. An example is:
+        ii. **Create Single Directory:** Resolve the **Flow Directory** via the **Universal File Resolution Protocol** (which defaults to `<root_directory>/specs/`) and create a single new directory: `<root_directory>/specs/<flow_id>/`.
+        iii. **Create `metadata.json`:** In the new directory, create a `metadata.json` file with the correct structure and content, using the stored Flow ID. An example is:
             - ```json
             {
-            "prd_id": "<prd_id>",
+            "flow_id": "<flow_id>",
             "type": "feature", // or "bug"
             "status": "new", // or in_progress, completed, cancelled
             "created_at": "YYYY-MM-DDTHH:MM:SSZ",
@@ -719,7 +720,7 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
         iv. **Write Spec and Plan Files:** In the exact same directory, write the generated `spec.md` and `plan.md` files.
         v.  **Write Index File:** In the exact same directory, write `index.md` with content:
             ```markdown
-            # PRD <prd_id> Context
+            # Flow <flow_id> Context
 
             - [Specification](./spec.md)
             - [Implementation Plan](./plan.md)
@@ -740,7 +741,13 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
         # Allow Gemini to access Flow specification files
         !.agent/
         ```
-    -   Check if `.gitignore` exists and add `.geminiignore` to it (if not already present).
+    -   Check if `.gitignore` exists and does not already contain `.geminiignore`.
+    -   **If `.gitignore` exists and needs update:**
+        -   Ask user: "Add `.geminiignore` to `.gitignore`? (Recommended)"
+            -   **A) Yes**
+            -   **B) No**
+        -   If A: Append `.geminiignore` to `.gitignore`.
+    -   **If `.gitignore` does not exist:** Do nothing regarding gitignore.
     -   This ensures Flow files are accessible to Gemini while respecting the user's git preferences.
 
 3.  **Save Flow Files (Respect Gitignore):**

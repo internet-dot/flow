@@ -4,11 +4,11 @@ You are working in a project using the **Flow Framework** for context-driven dev
 
 ## Key Concepts
 
-### Tracks
-A track is a logical unit of work (feature, bug fix, refactor). Each track has:
+### Flows
+A flow is a logical unit of work (feature, bug fix, refactor). Each flow has:
 - **Unique ID format:** `shortname_YYYYMMDD` (e.g., `user-auth_20260124`)
 - **Status markers:** `[ ]` pending, `[~]` in progress, `[x]` completed, `[!]` blocked, `[-]` skipped
-- **Own directory** at `.agent/specs/{track_id}/` with spec, plan, metadata, learnings
+- **Own directory** at `.agent/specs/{flow_id}/` with spec, plan, metadata, learnings
 
 ### Beads Integration
 Beads provides persistent cross-session memory:
@@ -21,7 +21,7 @@ bd prime                   # Load context for session
 ```
 
 ### Task Workflow (TDD)
-1. Select task from plan.md (or use `bd ready`)
+1. Select task from plan.md (or `bd ready`)
 2. Mark `[~]` in progress → `bd update <id> --status in_progress`
 3. **Write failing tests** (Red)
 4. **Implement to pass** (Green)
@@ -37,8 +37,8 @@ bd prime                   # Load context for session
 ├── tech-stack.md        # Technology choices
 ├── workflow.md          # Development workflow
 ├── patterns.md          # Consolidated learnings
-├── tracks.md            # Master track list
-└── specs/{track_id}/    # Track-specific files
+├── flows.md             # Master flow list
+└── specs/{flow_id}/    # Flow-specific files
     ├── spec.md          # Requirements
     ├── plan.md          # Phased task list
     └── learnings.md     # Patterns discovered
@@ -46,7 +46,7 @@ bd prime                   # Load context for session
 
 ## Flow Commands
 - `/flow:setup` - Initialize project
-- `/flow:prd` - Create new track
+- `/flow:prd` - Create PRD
 - `/flow:implement` - Execute tasks from plan
 - `/flow:status` - Display progress overview
 - `/flow:block` - Mark task as blocked

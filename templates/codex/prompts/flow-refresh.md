@@ -39,9 +39,9 @@ Check if patterns in `.agent/patterns.md` are still valid:
 
 Flag stale patterns for review.
 
-## Phase 3: Track Sync
+## Phase 3: Flow Sync
 
-For each active track:
+For each active flow:
 1. Check if affected files still exist
 2. Verify test files match implementation
 3. Update plan.md if file paths changed
@@ -63,7 +63,7 @@ Updated:
 
 Flagged for Review:
 - patterns.md: Line 45 references removed file
-- {track_id}: Task 3 file path changed
+- {flow_id}: Task 3 file path changed
 
 Run `/flow:validate` for full integrity check.
 ```

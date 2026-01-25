@@ -7,8 +7,8 @@ Create context handoff document for session transfer.
 
 ## Phase 1: Gather Current State
 
-### 1.1 Active Track
-Read current in-progress track from `.agent/tracks.md`
+### 1.1 Active Flow
+Read current in-progress flow from `.agent/flows.md`
 
 ### 1.2 Current Task
 ```bash
@@ -29,7 +29,7 @@ Create `.agent/handoff.md`:
 # Session Handoff
 
 **Generated:** {timestamp}
-**Track:** {track_id}
+**Flow:** {flow_id}
 **Phase:** {current_phase}
 **Task:** {current_task}
 
@@ -70,7 +70,7 @@ bd ready
 ```bash
 bd prime
 # Then run:
-/flow:implement {track_id}
+/flow:implement {flow_id}
 ```
 ```
 
@@ -88,5 +88,5 @@ Handoff Created: .agent/handoff.md
 To resume in new session:
 1. Read .agent/handoff.md
 2. Run: bd prime
-3. Run: /flow:implement {track_id}
+3. Run: /flow:implement {flow_id}
 ```

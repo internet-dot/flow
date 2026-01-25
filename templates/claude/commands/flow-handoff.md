@@ -1,6 +1,6 @@
 ---
 description: Create context handoff for session transfer
-argument-hint: <track_id>
+argument-hint: <flow_id>
 allowed-tools: Read, Write, Edit, Glob, Bash
 ---
 
@@ -20,7 +20,7 @@ Creating handoff for: **$ARGUMENTS**
 ## Phase 2: Gather Context
 
 Collect:
-- Recent git history for track
+- Recent git history for flow
 - Learnings from learnings.md
 - Any notes from Beads
 - Files modified in current phase
@@ -29,10 +29,10 @@ Collect:
 
 ## Phase 3: Generate Handoff Document
 
-Create `.agent/specs/{track_id}/handoff_{N}.md`:
+Create `.agent/specs/{flow_id}/handoff_{N}.md`:
 
 ```markdown
-# Handoff: {track_id}
+# Handoff: {flow_id}
 
 **Created:** {timestamp}
 **Handoff Number:** {N}
@@ -105,8 +105,8 @@ Save to `implement_state.json`:
 ## Phase 5: Commit Handoff
 
 ```bash
-git add .agent/specs/{track_id}/
-git commit -m "flow(handoff): {track_id} handoff {N}"
+git add .agent/specs/{flow_id}/
+git commit -m "flow(handoff): {flow_id} handoff {N}"
 ```
 
 ---
@@ -116,14 +116,14 @@ git commit -m "flow(handoff): {track_id} handoff {N}"
 ```
 Handoff Created
 
-Track: {track_id}
+Flow: {flow_id}
 Handoff: handoff_{N}.md
 Progress: {completed}/{total} tasks
 
 To resume in new session:
 1. Run `bd prime` to load Beads context
-2. Read .agent/specs/{track_id}/handoff_{N}.md
-3. Run `/flow-implement {track_id}` to continue
+2. Read .agent/specs/{flow_id}/handoff_{N}.md
+3. Run `/flow-implement {flow_id}` to continue
 ```
 
 ---

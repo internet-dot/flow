@@ -1,15 +1,15 @@
 description = "Update spec or plan when implementation reveals issues"
 prompt = """
 ## SYSTEM DIRECTIVE
-You are revising a track's spec or plan because implementation has revealed new information. All revisions must be documented.
+You are revising a flow's spec or plan because implementation has revealed new information. All revisions must be documented.
 
-**Input:** $ARGUMENTS (track_id)
+**Input:** $ARGUMENTS (flow_id)
 
 ---
 
 ## Phase 1: Load Current State
 
-Read from `.agent/specs/{track_id}/`:
+Read from `.agent/specs/{flow_id}/`:
 - spec.md
 - plan.md
 - learnings.md
@@ -66,7 +66,7 @@ Based on revision type:
 
 ## Phase 5: Log Revision
 
-Append to `.agent/specs/{track_id}/revisions.md`:
+Append to `.agent/specs/{flow_id}/revisions.md`:
 
 ```markdown
 ## [YYYY-MM-DD HH:MM] Revision {N}
@@ -104,7 +104,7 @@ bd update {affected_task_ids} --notes "Revised: {brief reason}"
 
 For new tasks:
 ```bash
-bd create "{task}" --parent {epic_id} -p 1
+bd create "{task}" --parent {epic_id} -p 1 --description "{task}" --notes "Created by Flow revision"
 ```
 
 For removed tasks:
@@ -117,8 +117,8 @@ bd close {task_id} --reason "Removed in revision"
 ## Phase 7: Commit Revision
 
 ```bash
-git add .agent/specs/{track_id}/
-git commit -m "flow(revise): {track_id} - {brief description}"
+git add .agent/specs/{flow_id}/
+git commit -m "flow(revise): {flow_id} - {brief description}"
 ```
 
 ---
@@ -126,9 +126,9 @@ git commit -m "flow(revise): {track_id} - {brief description}"
 ## Final Summary
 
 ```
-Track Revised
+Flow Revised
 
-Track: {track_id}
+Flow: {flow_id}
 Revision: #{N}
 
 Changes:

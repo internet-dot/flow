@@ -1,6 +1,6 @@
 ---
 description: Mark task as blocked with reason
-argument-hint: <track_id> <task_number> "<reason>"
+argument-hint: <flow_id> <task_number> "<reason>"
 allowed-tools: Read, Write, Edit, Bash
 ---
 
@@ -11,7 +11,7 @@ Blocking task: **$ARGUMENTS**
 ## Phase 1: Parse Arguments
 
 Extract:
-- track_id
+- flow_id
 - task_number
 - reason
 
@@ -19,7 +19,7 @@ Extract:
 
 ## Phase 2: Update Plan
 
-In `.agent/specs/{track_id}/plan.md`:
+In `.agent/specs/{flow_id}/plan.md`:
 
 ```markdown
 - [!] N. Task description [BLOCKED: {reason}]
@@ -37,7 +37,7 @@ bd block {task_id} --reason "{reason}"
 
 ## Phase 4: Log Blocker
 
-Append to `.agent/specs/{track_id}/blockers.md`:
+Append to `.agent/specs/{flow_id}/blockers.md`:
 
 ```markdown
 ## [YYYY-MM-DD HH:MM] Task N: {description}
@@ -54,13 +54,13 @@ Append to `.agent/specs/{track_id}/blockers.md`:
 ```
 Task Blocked
 
-Track: {track_id}
+Flow: {flow_id}
 Task: {N}. {description}
 Reason: {reason}
 
 Next Steps:
 - Address the blocker
-- Run `/flow-implement {track_id}` to continue with other tasks
+- Run `/flow-implement {flow_id}` to continue with other tasks
 - Run `bd ready` to see unblocked tasks
 ```
 

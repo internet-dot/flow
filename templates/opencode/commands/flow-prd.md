@@ -1,17 +1,17 @@
 # Flow PRD
 
-Create a new track with specification and implementation plan.
+Create a PRD with specification and implementation plan.
 
 ## Phase 1: Validate Environment
 
 Check for `.agent/` directory. If missing: "Run `/flow:setup` first." → HALT
 
-## Phase 2: Gather Track Information
+## Phase 2: Gather Flow Information
 
-### 2.1 Track Description
+### 2.1 Flow Description
 User provides: description of what to build
 
-### 2.2 Generate Track ID
+### 2.2 Generate Flow ID
 Format: `shortname_YYYYMMDD`
 Example: `user-auth_20260124`
 
@@ -24,10 +24,10 @@ Before writing spec:
 
 ## Phase 4: Create Spec
 
-Create `.agent/specs/{track_id}/spec.md`:
+Create `.agent/specs/{flow_id}/spec.md`:
 
 ```markdown
-# {Track Title}
+# {Flow Title}
 
 ## Overview
 {Brief description}
@@ -44,16 +44,21 @@ Create `.agent/specs/{track_id}/spec.md`:
 - [ ] Performance targets
 - [ ] Security requirements
 
+## Constraints
+- {Technical constraints}
+- {Business constraints}
+
 ## Affected Files
 - `src/file1.ts` - {reason}
+- `src/file2.ts` - {reason}
 ```
 
 ## Phase 5: Create Plan
 
-Create `.agent/specs/{track_id}/plan.md`:
+Create `.agent/specs/{flow_id}/plan.md`:
 
 ```markdown
-# Implementation Plan: {track_id}
+# Implementation Plan: {flow_id}
 
 ## Phase 1: {Phase Name}
 
@@ -65,26 +70,26 @@ Create `.agent/specs/{track_id}/plan.md`:
 ## Phase 6: Create Beads Epic
 
 ```bash
-bd create "Track: {track_id}" -t epic -p 1
-bd create "{task_description}" --parent {epic_id} -p 1
+bd create "Flow: {flow_id}" -t epic -p 1 --description "{brief_description}" --notes "Created by Flow | Git: $(git branch --show-current)@$(git rev-parse --short HEAD)"
+bd create "{task_description}" --parent {epic_id} -p 1 --description "{task_description}" --notes "Created by Flow"
 ```
 
-## Phase 7: Register Track
+## Phase 7: Register Flow
 
-Add to `.agent/tracks.md`:
+Add to `.agent/flows.md`:
 ```markdown
 ## Active
 
-- [ ] `{track_id}` - {description} (epic: {epic_id})
+- [ ] `{flow_id}` - {description} (epic: {epic_id})
 ```
 
 ## Final Output
 
 ```
-Track Created: {track_id}
+Flow Created: {flow_id}
 
-Spec: .agent/specs/{track_id}/spec.md
-Plan: .agent/specs/{track_id}/plan.md
+Spec: .agent/specs/{flow_id}/spec.md
+Plan: .agent/specs/{flow_id}/plan.md
 
-Next: Run `/flow:implement {track_id}` to start
+Next: Run `/flow:implement {flow_id}` to start
 ```

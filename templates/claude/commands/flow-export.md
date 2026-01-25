@@ -11,9 +11,9 @@ Generating project summary export.
 ## Phase 1: Gather Data
 
 Collect:
-- All tracks from `.agent/prds.md`
+- All flows from `.agent/prds.md`
 - All patterns from `.agent/patterns.md`
-- Track details from `.agent/specs/*/`
+- Flow details from `.agent/specs/*/`
 - Archive details from `.agent/archive/*/`
 
 ---
@@ -30,14 +30,14 @@ Collect:
 
 ## Overview
 
-- Active Tracks: {count}
-- Archived Tracks: {count}
+- Active Flows: {count}
+- Archived Flows: {count}
 - Total Tasks: {count}
 - Completion Rate: {%}
 
-## Active Tracks
+## Active Flows
 
-### {track_id}
+### {flow_id}
 
 **Status:** In Progress
 **Progress:** {completed}/{total} tasks
@@ -45,9 +45,9 @@ Collect:
 
 Description: {from spec.md}
 
-## Archived Tracks
+## Archived Flows
 
-### {track_id}
+### {flow_id}
 
 **Completed:** {date}
 **Duration:** {days}
@@ -72,7 +72,7 @@ Patterns Extracted: {count}
 {
   "generated": "ISO date",
   "project": "name",
-  "tracks": {
+  "flows": {
     "active": [...],
     "archived": [...]
   },

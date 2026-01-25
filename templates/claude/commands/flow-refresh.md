@@ -101,7 +101,7 @@ Beads Synced: Yes
 
 Recommendations:
 - Review new patterns for accuracy
-- Update track specs if affected
+- Update flow specs if affected
 ```
 
 ---

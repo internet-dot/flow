@@ -1,6 +1,6 @@
 ---
 description: Skip task with justification
-argument-hint: <track_id> <task_number> "<reason>"
+argument-hint: <flow_id> <task_number> "<reason>"
 allowed-tools: Read, Write, Edit, Bash
 ---
 
@@ -11,7 +11,7 @@ Skipping task: **$ARGUMENTS**
 ## Phase 1: Parse Arguments
 
 Extract:
-- track_id
+- flow_id
 - task_number
 - reason
 
@@ -19,7 +19,7 @@ Extract:
 
 ## Phase 2: Update Plan
 
-In `.agent/specs/{track_id}/plan.md`:
+In `.agent/specs/{flow_id}/plan.md`:
 
 ```markdown
 - [-] N. Task description [-: {reason}]
@@ -37,7 +37,7 @@ bd update {task_id} --status skipped --notes "Skipped: {reason}"
 
 ## Phase 4: Log Skip
 
-Append to `.agent/specs/{track_id}/skipped.md`:
+Append to `.agent/specs/{flow_id}/skipped.md`:
 
 ```markdown
 ## [YYYY-MM-DD HH:MM] Task N: {description}

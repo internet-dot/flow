@@ -11,6 +11,7 @@ Creating PRD for: **$ARGUMENTS**
 ## Phase 0: Setup Check
 
 Using the **Universal File Resolution Protocol**, verify:
+
 - **Product Definition** (`.agent/product.md`)
 - **Tech Stack** (`.agent/tech-stack.md`)
 - **Workflow** (`.agent/workflow.md`)
@@ -27,7 +28,6 @@ Check if `.agent/research/` exists and contains research documents.
 
 **If Research Exists:**
 > "I found existing research that may be relevant:
-> 1. [research_id]: [topic] (Created: [date])
 >
 > Would you like to:
 > A) Use this research as basis for PRD
@@ -61,6 +61,7 @@ Ask questions **sequentially** (one at a time) to gather spec details:
 - **REFACTOR/CHORE:** 2-3 questions about scope, constraints, success criteria
 
 **Guidelines:**
+
 - Provide 2-3 plausible options (A, B, C) for each question
 - Last option MUST be "Type your own answer"
 - Refer to Product Definition and Tech Stack for context
@@ -132,6 +133,7 @@ Present drafted `spec.md` for review. Revise until confirmed.
 3. Generate `plan.md` with Phases, Tasks, Sub-tasks
 
 **Requirements:**
+
 - Status markers `[ ]` for EVERY task/sub-task
 - Follow TDD methodology from Workflow
 - Include checkpoint task per phase: `[ ] Task: Checkpoint - Verify Phase X complete`
@@ -143,34 +145,37 @@ Present drafted `plan.md` for user confirmation.
 
 ## Phase 5: Create PRD Artifacts
 
-### 5.1 Generate PRD ID
+### 5.1 Generate Flow ID
 
 Slug format from description:
+
 - Lowercase, hyphens for spaces
 - Remove special characters
 - Example: "Add User Authentication" → `user-auth`
 
-Check `.agent/specs/` for existing PRD with same name. If exists, suggest different name.
+Check `.agent/specs/` for existing Flow with same name. If exists, suggest different name.
 
 ### 5.2 Create Files
 
 ```bash
-mkdir -p .agent/specs/{prd_id}
+mkdir -p .agent/specs/{flow_id}
 ```
 
 Create:
-- `.agent/specs/{prd_id}/spec.md`
-- `.agent/specs/{prd_id}/plan.md`
-- `.agent/specs/{prd_id}/metadata.json`
-- `.agent/specs/{prd_id}/index.md`
 
-### 5.3 Update PRD Registry
+- `.agent/specs/{flow_id}/spec.md`
+- `.agent/specs/{flow_id}/plan.md`
+- `.agent/specs/{flow_id}/metadata.json`
+- `.agent/specs/{flow_id}/index.md`
 
-Append to `.agent/prds.md`:
+### 5.3 Update Flow Registry
+
+Append to `.agent/flows.md`:
+
 ```markdown
 ---
-- [ ] **PRD: {description}**
-*Link: [./specs/{prd_id}/](./specs/{prd_id}/)*
+- [ ] **Flow: {description}**
+*Link: [./specs/{flow_id}/](./specs/{flow_id}/)*
 *Risk Level: [low|medium|high]*
 ```
 
@@ -179,6 +184,7 @@ Append to `.agent/prds.md`:
 ## Phase 6: Quality Gates
 
 Before completion, verify:
+
 - [ ] Functional requirements are specific and testable
 - [ ] Acceptance criteria are measurable
 - [ ] Technical approach references codebase patterns
@@ -190,11 +196,12 @@ Before completion, verify:
 
 ## Phase 7: Completion
 
-> "PRD '{prd_id}' created.
+> "PRD '{flow_id}' created.
 >
 > **Summary:**
-> - Specification: `.agent/specs/{prd_id}/spec.md`
-> - Plan: `.agent/specs/{prd_id}/plan.md`
+>
+> - Specification: `.agent/specs/{flow_id}/spec.md`
+> - Plan: `.agent/specs/{flow_id}/plan.md`
 > - Risk Level: [level]
 >
 > **IMPORTANT:** I will NOT automatically start implementation.

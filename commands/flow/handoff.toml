@@ -3,13 +3,13 @@ prompt = """
 ## SYSTEM DIRECTIVE
 You are creating a handoff document for transferring context between sessions. This ensures continuity when resuming work later.
 
-**Input:** $ARGUMENTS (track_id)
+**Input:** $ARGUMENTS (flow_id)
 
 ---
 
 ## Phase 1: Analyze Progress
 
-1. Read `.agent/specs/{track_id}/plan.md`
+1. Read `.agent/specs/{flow_id}/plan.md`
 2. Calculate completion percentage
 3. Identify current phase and task
 4. Check for any blockers
@@ -19,9 +19,9 @@ You are creating a handoff document for transferring context between sessions. T
 ## Phase 2: Gather Context
 
 Collect:
-1. Recent git history for this track:
+1. Recent git history for this flow:
    ```bash
-   git log --notes --grep="track.*{track_id}" --oneline -10
+   git log --notes --grep="flow.*{flow_id}" --oneline -10
    ```
 2. Learnings from `learnings.md`
 3. Any notes from Beads: `bd show {epic_id}`
@@ -33,7 +33,7 @@ Collect:
 
 Count existing handoff files:
 ```bash
-ls .agent/specs/{track_id}/handoff_*.md 2>/dev/null | wc -l
+ls .agent/specs/{flow_id}/handoff_*.md 2>/dev/null | wc -l
 ```
 
 New handoff number = count + 1
@@ -42,10 +42,10 @@ New handoff number = count + 1
 
 ## Phase 4: Generate Handoff Document
 
-Create `.agent/specs/{track_id}/handoff_{N}.md`:
+Create `.agent/specs/{flow_id}/handoff_{N}.md`:
 
 ```markdown
-# Handoff: {track_id}
+# Handoff: {flow_id}
 
 **Created:** {timestamp}
 **Handoff Number:** {N}
@@ -89,7 +89,7 @@ Create `.agent/specs/{track_id}/handoff_{N}.md`:
 ```bash
 bd prime                    # Load AI-optimized context
 bd ready                    # List unblocked tasks
-bd show {epic_id}          # View track status
+bd show {epic_id}          # View flow status
 ```
 
 ## Notes for Next Session
@@ -101,7 +101,7 @@ bd show {epic_id}          # View track status
 
 ## Phase 5: Update State
 
-Save to `.agent/specs/{track_id}/implement_state.json`:
+Save to `.agent/specs/{flow_id}/implement_state.json`:
 
 ```json
 {
@@ -117,8 +117,8 @@ Save to `.agent/specs/{track_id}/implement_state.json`:
 ## Phase 6: Commit Handoff
 
 ```bash
-git add .agent/specs/{track_id}/
-git commit -m "flow(handoff): {track_id} handoff {N}"
+git add .agent/specs/{flow_id}/
+git commit -m "flow(handoff): {flow_id} handoff {N}"
 ```
 
 ---
@@ -128,14 +128,14 @@ git commit -m "flow(handoff): {track_id} handoff {N}"
 ```
 Handoff Created
 
-Track: {track_id}
+Flow: {flow_id}
 Handoff: handoff_{N}.md
 Progress: {completed}/{total} tasks ({percentage}%)
 
 To resume in new session:
 1. Run `bd prime` to load Beads context
-2. Read .agent/specs/{track_id}/handoff_{N}.md
-3. Run `/flow:implement {track_id}` to continue
+2. Read .agent/specs/{flow_id}/handoff_{N}.md
+3. Run `/flow:implement {flow_id}` to continue
 ```
 
 ---

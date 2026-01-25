@@ -5,7 +5,7 @@
   "epicPrefix": "flow",
   "autoCreateTasks": true,
   "autoSyncOnComplete": true,
-  "compactOnArchive": true,
+  "compactOnArchive": false,
   "taskStatusMapping": {
     "pending": "[ ]",
     "in_progress": "[~]",

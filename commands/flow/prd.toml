@@ -27,7 +27,7 @@ CRITICAL: You must validate the success of every tool call. If any tool call fai
 
 ### 2.1 Detect Available Research
 
-1.  **Scan Research Directory:** Check if `<PRD Directory>/research/` exists and contains any research documents.
+1.  **Scan Research Directory:** Check if `.agent/research/` exists and contains any research documents.
 
 2.  **If Research Exists:**
     -   List all research documents with their topics and dates
@@ -226,19 +226,19 @@ The `spec.md` MUST include these sections:
     > "Does this plan look correct and cover all the necessary steps based on the spec and our workflow? Please suggest any changes or confirm."
     Await user feedback and revise the `plan.md` content until confirmed.
 
-### 3.5 Create PRD Artifacts and Update PRD Registry
+### 3.5 Create PRD Artifacts and Update Flow Registry
 
-1.  **Check for existing PRD name:** Before generating a new PRD ID, resolve the **PRD Directory** using the **Universal File Resolution Protocol**. List all existing PRD directories in that resolved path. If the proposed slug for the new PRD (derived from the initial description) matches an existing directory name, halt the PRD creation. Explain that a PRD with that name already exists and suggest choosing a different name or resuming the existing PRD.
-2.  **Generate PRD ID:** Create a unique PRD ID using a simple slug format:
+1.  **Check for existing Flow name:** Before generating a new Flow ID, resolve the **Flow Directory** using the **Universal File Resolution Protocol** (this defaults to `.agent/specs/`). List all existing Flow directories in that resolved path. If the proposed slug for the new Flow (derived from the initial description) matches an existing directory name, halt the PRD creation. Explain that a Flow with that name already exists and suggest choosing a different name or resuming the existing Flow.
+2.  **Generate Flow ID:** Create a unique Flow ID using a simple slug format:
     -   Convert the description to lowercase
     -   Replace spaces with hyphens
     -   Remove special characters
     -   Example: "Add User Authentication" -> `user-auth`
-3.  **Create Directory:** Create a new directory for the PRD: `<PRD Directory>/<prd_id>/`.
-4.  **Create `metadata.json`:** Create a metadata file at `<PRD Directory>/<prd_id>/metadata.json` with content like:
+3.  **Create Directory:** Create a new directory for the Flow: `<Flow Directory>/<flow_id>/` (e.g. `.agent/specs/<flow_id>/`).
+4.  **Create `metadata.json`:** Create a metadata file at `<Flow Directory>/<flow_id>/metadata.json` with content like:
     ```json
     {
-      "prd_id": "<prd_id>",
+      "flow_id": "<flow_id>",
       "type": "feature",
       "status": "new",
       "created_at": "YYYY-MM-DDTHH:MM:SSZ",
@@ -252,11 +252,11 @@ The `spec.md` MUST include these sections:
     ```
     *   Populate fields with actual values. Use the current timestamp.
 5.  **Write Files:**
-    *   Write the confirmed specification content to `<PRD Directory>/<prd_id>/spec.md`.
-    *   Write the confirmed plan content to `<PRD Directory>/<prd_id>/plan.md`.
-    *   Write the index file to `<PRD Directory>/<prd_id>/index.md` with content:
+    *   Write the confirmed specification content to `<Flow Directory>/<flow_id>/spec.md`.
+    *   Write the confirmed plan content to `<Flow Directory>/<flow_id>/plan.md`.
+    *   Write the index file to `<Flow Directory>/<flow_id>/index.md` with content:
         ```markdown
-        # PRD <prd_id> Context
+        # Flow <flow_id> Context
 
         - [Specification](./spec.md)
         - [Implementation Plan](./plan.md)
@@ -264,25 +264,25 @@ The `spec.md` MUST include these sections:
         [If research linked:]
         - [Research](../research/<research_id>/research.md)
         ```
-6.  **Update Research Link:** If research was used, update the research metadata to set `linked_prd` to this PRD's ID.
-7.  **Update PRD Registry:**
-    -   **Announce:** Inform the user you are updating the **PRD Registry**.
-    -   **Append Section:** Resolve the **PRD Registry** via the **Universal File Resolution Protocol**. Append a new section for the PRD to the end of this file. The format MUST be:
+6.  **Update Research Link:** If research was used, update the research metadata to set `linked_flow` to this Flow's ID.
+7.  **Update Flow Registry:**
+    -   **Announce:** Inform the user you are updating the **Flow Registry**.
+    -   **Append Section:** Resolve the **Flow Registry** via the **Universal File Resolution Protocol** (defaults to `.agent/flows.md`). Append a new section for the Flow to the end of this file. The format MUST be:
         ```markdown
 
         ---
 
-        - [ ] **PRD: <PRD Description>**
-        *Link: [./<Relative PRD Path>/](./<Relative PRD Path>/)*
+        - [ ] **Flow: <PRD Description>**
+        *Link: [./specs/<flow_id>/](./specs/<flow_id>/)*
         *Risk Level: [low|medium|high]*
         ```
-        (Replace `<Relative PRD Path>` with the path to the PRD directory relative to the **PRD Registry** file location.)
+        (Ensure the link path matches the actual location relative to the registry file).
 8.  **Announce Completion:** Inform the user:
-    > "New PRD '<prd_id>' has been created and added to the PRD registry.
+    > "New Flow '<flow_id>' has been created and added to the Flow registry.
     >
     > **Summary:**
-    > - Specification: `<path>/spec.md`
-    > - Plan: `<path>/plan.md`
+    > - Specification: `<Flow Directory>/<flow_id>/spec.md`
+    > - Plan: `<Flow Directory>/<flow_id>/plan.md`
     > - Risk Level: [level]
     > - Recovery Strategy: [defined/pending]
     > [If research used: "- Based on research: [research_id]"]
@@ -310,7 +310,7 @@ Before marking PRD as ready, verify:
 If critical information cannot be gathered:
 1. Document gaps with `[NEEDS CLARIFICATION]` tags
 2. Add items to "Open Questions" section
-3. Set PRD status to `needs_review` instead of `new`
+3. Set Flow status to `needs_review` instead of `new`
 4. Announce: "PRD created with open questions that need resolution before implementation."
 
 ---
@@ -320,7 +320,7 @@ If critical information cannot be gathered:
 
 1.  **Completion Announcement:**
     After PRD creation is complete, you MUST announce:
-    > "PRD creation complete. The specification and plan have been saved to `<prd_path>/`.
+    > "PRD creation complete. The specification and plan have been saved to `<flow_path>/`.
     >
     > **IMPORTANT:** I will NOT automatically start implementation.
     > When you're ready, explicitly run `/flow:implement` or tell me to begin implementation.

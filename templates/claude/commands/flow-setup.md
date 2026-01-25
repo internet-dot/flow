@@ -1,5 +1,5 @@
 ---
-description: Initialize Flow project with context files, Beads integration, and first track
+description: Initialize Flow project with context files, Beads integration, and first flow
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, mcp__sequential-thinking__sequentialthinking
 ---
 
@@ -83,9 +83,9 @@ D) Skip migration
 2. Read `spec.md` and `plan.md`
 3. Read `learnings.md` if exists
 4. Check if referenced files still exist in codebase
-5. Copy to `.agent/specs/{track_id}/`
-6. Update `.agent/tracks.md` registry
-7. Create Beads epic if not exists: `bd create "Track: {track_id}" -t epic -p 2`
+5. Copy to `.agent/specs/{flow_id}/`
+6. Update `.agent/flows.md` registry
+7. Create Beads epic if not exists: `bd create "Flow: {flow_id}" -t epic -p 2 --description "{flow_description}" --notes "Created by Flow during setup"`
 
 ### 0.1.3 Learnings Ingestion with Validation
 
@@ -251,17 +251,17 @@ Create `.agent/beads.json` with configuration.
 
 Create:
 - `.agent/index.md` - File resolution index
-- `.agent/prds.md` - Empty track registry
+- `.agent/prds.md` - Empty flow registry
 - `.agent/patterns.md` - Empty patterns template
 
 ---
 
-## Phase 7: First Track (Optional)
+## Phase 7: First Flow (Optional)
 
-> **Would you like to create your first track?**
+> **Would you like to create your first flow?**
 > Describe what you want to build.
 
-If yes, invoke `/flow-newtrack` with description.
+If yes, invoke `/flow-prd` with description.
 
 ---
 
@@ -301,8 +301,8 @@ Created:
 
 Next Steps:
 1. Run `bd prime` to load Beads context
-2. Run `/flow-newtrack "description"` to create your first track
-3. Run `/flow-implement {track_id}` to start coding
+2. Run `/flow-prd "description"` to create your first flow
+3. Run `/flow-implement {flow_id}` to start coding
 ```
 
 ---

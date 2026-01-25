@@ -1,9 +1,9 @@
-description = "List and manage track templates (Beads formulas)"
+description = "List and manage flow templates (Beads formulas)"
 prompt = """
 ## SYSTEM DIRECTIVE
-You are managing Beads track templates (formulas). Handle list, pour, and distill operations.
+You are managing Beads flow templates (formulas). Handle list, pour, and distill operations.
 
-**Input:** $ARGUMENTS (action: list|pour|distill, and optional template_name or track_id)
+**Input:** $ARGUMENTS (action: list|pour|distill, and optional template_name or flow_id)
 
 ---
 
@@ -11,8 +11,8 @@ You are managing Beads track templates (formulas). Handle list, pour, and distil
 
 Determine action from $ARGUMENTS:
 - `list` - Show available templates
-- `pour {template}` - Create track from template
-- `distill {track_id} {name}` - Extract template from track
+- `pour {template}` - Create flow from template
+- `distill {flow_id} {name}` - Extract template from flow
 
 If no arguments, default to `list`.
 
@@ -65,32 +65,32 @@ bd mol pour {template_name}
 
 ### Phase 3b: Customize
 
-1. Ask for track description
-2. Generate track_id with date suffix
+1. Ask for flow description
+2. Generate flow_id with date suffix
 3. Replace template placeholders
 4. Create Beads epic and tasks
-5. Register in prds.md
+5. Register in flows.md
 
 ### Phase 4b: Report
 
 ```
-Track Created from Template
+Flow Created from Template
 
 Template: {template_name}
-Track ID: {track_id}
+Flow ID: {flow_id}
 Tasks: {count}
 Beads Epic: {epic_id}
 
-Next: Run `/flow:implement {track_id}` to start
+Next: Run `/flow:implement {flow_id}` to start
 ```
 
 ---
 
 ## Action: DISTILL
 
-### Phase 2c: Read Track
+### Phase 2c: Read Flow
 
-1. Verify track exists: `.agent/specs/{track_id}/` or `.agent/archive/{track_id}/`
+1. Verify flow exists: `.agent/specs/{flow_id}/` or `.agent/archive/{flow_id}/`
 2. Read spec.md, plan.md, learnings.md
 
 ### Phase 3c: Abstract
@@ -107,7 +107,7 @@ Create `.agent/templates/{name}.md`:
 ```markdown
 # Template: {name}
 
-**Source:** {track_id}
+**Source:** {flow_id}
 **Created:** {date}
 
 ## When to Use
@@ -140,7 +140,7 @@ bd mol distill {epic_id} {name}
 Template Extracted
 
 Name: {name}
-Source: {track_id}
+Source: {flow_id}
 Location: .agent/templates/{name}.md
 Beads: Registered
 

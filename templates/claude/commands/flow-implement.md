@@ -1,16 +1,16 @@
 ---
-description: Execute tasks from track plan with TDD workflow
-argument-hint: <track_id>
+description: Execute tasks from flow plan with TDD workflow
+argument-hint: <flow_id>
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, WebSearch, mcp__context7__resolve-library-id, mcp__context7__query-docs, mcp__pal__thinkdeep, mcp__pal__debug, mcp__pal__analyze
 ---
 
 # Flow Implement
 
-Implementing track: **$ARGUMENTS**
+Implementing flow: **$ARGUMENTS**
 
 ## Phase 0: Load Context
 
-1. Load track from `.agent/specs/{track_id}/`
+1. Load flow from `.agent/specs/{flow_id}/`
 2. Read `spec.md`, `plan.md`, `learnings.md`
 3. Read `.agent/patterns.md` for project patterns
 4. Read `.agent/workflow.md` for process guidelines
@@ -22,7 +22,7 @@ Implementing track: **$ARGUMENTS**
 ```bash
 bd prime                    # Load AI-optimized context
 bd ready                    # List unblocked tasks
-bd show {epic_id}          # View track status
+bd show {epic_id}          # View flow status
 ```
 
 ---
@@ -96,7 +96,7 @@ git commit -m "{type}({scope}): {description}"
 ### 3.7 Attach Git Notes
 
 ```bash
-git notes add -m '{"workflow":"flow","track":"{track_id}","task":"{task_id}"}' HEAD
+git notes add -m '{"workflow":"flow","flow":"{flow_id}","task":"{task_id}"}' HEAD
 ```
 
 ### 3.8 Update Plan
@@ -185,11 +185,11 @@ git notes add -m "{verification_report}" HEAD
 
 ---
 
-## Phase 5: Track Completion
+## Phase 5: Flow Completion
 
 When all tasks complete:
 
-1. Run `/flow-archive {track_id}` to archive
+1. Run `/flow-archive {flow_id}` to archive
 2. Elevate remaining learnings to `patterns.md`
 3. Update `.agent/prds.md` status to `[x]`
 
@@ -209,7 +209,7 @@ If implementation fails:
 ## Final Summary
 
 ```
-Implementation Progress: {track_id}
+Implementation Progress: {flow_id}
 
 Tasks: {completed}/{total}
 Current Phase: {N}

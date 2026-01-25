@@ -20,7 +20,7 @@ bd close {task_id} --reason "SKIPPED: {reason}"
 ```
 
 ### 2.3 Log to Skipped File
-Append to `.agent/specs/{track_id}/skipped.md`
+Append to `.agent/specs/{flow_id}/skipped.md`
 
 ## Phase 3: Continue
 

@@ -9,7 +9,7 @@ Check required files:
 - `.agent/tech-stack.md`
 - `.agent/workflow.md`
 - `.agent/patterns.md`
-- `.agent/tracks.md`
+- `.agent/flows.md`
 
 ## Phase 2: Beads Validation
 
@@ -17,7 +17,7 @@ Check required files:
 bd status
 ```
 
-Verify track/epic sync.
+Verify flow/epic sync.
 
 ## Phase 3: Content Validation
 

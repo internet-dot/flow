@@ -26,6 +26,7 @@ NC='\033[0m' # No Color
 # Script directory (where flow templates are)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATES_DIR="$SCRIPT_DIR/templates"
+SKILLS_DIR="$SCRIPT_DIR/skills"
 BACKUP_DIR="$HOME/.flow-backup-$(date +%Y%m%d-%H%M%S)"
 
 # CLI paths
@@ -194,7 +195,7 @@ install_claude() {
     fi
 
     # Install skills (merge with existing)
-    local skills_src="$TEMPLATES_DIR/skills"
+    local skills_src="$SKILLS_DIR"
     local skills_dst="$CLAUDE_DIR/skills"
 
     if [[ -d "$skills_src" ]]; then
@@ -274,7 +275,7 @@ install_codex() {
     fi
 
     # Install skills (beads and flow only for now)
-    local skills_src="$TEMPLATES_DIR/skills"
+    local skills_src="$SKILLS_DIR"
     local skills_dst="$CODEX_DIR/skills"
 
     for skill_name in "flow" "beads"; do
@@ -475,7 +476,7 @@ main() {
     $CODEX_INSTALLED && echo "     Codex CLI:   /flow:setup"
     $OPENCODE_INSTALLED && echo "     OpenCode:    /flow:setup"
     echo ""
-    echo "  3. Create your first track:"
+    echo "  3. Create your first flow:"
     $CLAUDE_INSTALLED && echo "     Claude Code: /flow-prd \"your feature description\""
     $CODEX_INSTALLED && echo "     Codex CLI:   /flow:prd \"your feature description\""
     $OPENCODE_INSTALLED && echo "     OpenCode:    /flow:prd \"your feature description\""

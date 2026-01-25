@@ -1,6 +1,6 @@
 ---
-description: Extract reusable template from completed track
-argument-hint: <track_id> <template_name>
+description: Extract reusable template from completed flow
+argument-hint: <flow_id> <template_name>
 allowed-tools: Read, Write, Edit, Bash, AskUserQuestion
 ---
 
@@ -8,9 +8,9 @@ allowed-tools: Read, Write, Edit, Bash, AskUserQuestion
 
 Extracting template from: **$ARGUMENTS**
 
-## Phase 1: Validate Track
+## Phase 1: Validate Flow
 
-1. Verify track exists and is complete (archived or all tasks done)
+1. Verify flow exists and is complete (archived or all tasks done)
 2. Read spec.md, plan.md, learnings.md
 
 ---
@@ -44,7 +44,7 @@ Create `.agent/templates/{template_name}.md`:
 ```markdown
 # Template: {template_name}
 
-**Source:** {track_id}
+**Source:** {flow_id}
 **Created:** {date}
 **Description:** {user description}
 
@@ -95,7 +95,7 @@ Create `.agent/templates/{template_name}.md`:
 
 ## Anti-Patterns
 
-{Things to avoid, learned from source track}
+{Things to avoid, learned from source flow}
 ```
 
 ---
@@ -112,7 +112,7 @@ bd mol distill {epic_id} {template_name}
 
 ```bash
 git add .agent/templates/{template_name}.md
-git commit -m "flow(template): Add {template_name} from {track_id}"
+git commit -m "flow(template): Add {template_name} from {flow_id}"
 ```
 
 ---
@@ -123,7 +123,7 @@ git commit -m "flow(template): Add {template_name} from {track_id}"
 Template Extracted
 
 Name: {template_name}
-Source: {track_id}
+Source: {flow_id}
 Location: .agent/templates/{template_name}.md
 
 Placeholders: {count}

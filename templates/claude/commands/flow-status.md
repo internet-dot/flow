@@ -1,15 +1,15 @@
 ---
-description: Display progress overview for all tracks
+description: Display progress overview for all flows
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
 # Flow Status
 
-Display progress overview for all active tracks.
+Display progress overview for all active flows.
 
 ## Phase 1: Load Registry
 
-Read `.agent/prds.md` to get list of active tracks.
+Read `.agent/prds.md` to get list of active flows.
 
 ---
 
@@ -22,11 +22,11 @@ bd ready
 
 ---
 
-## Phase 3: Track Summary
+## Phase 3: Flow Summary
 
-For each active track:
+For each active flow:
 
-1. Read `.agent/specs/{track_id}/plan.md`
+1. Read `.agent/specs/{flow_id}/plan.md`
 2. Count tasks by status: `[ ]`, `[~]`, `[x]`, `[!]`, `[-]`
 3. Calculate progress percentage
 
@@ -37,7 +37,7 @@ For each active track:
 ```
 Flow Status Dashboard
 
-=== Active Tracks ===
+=== Active Flows ===
 
 [~] auth_20260124 - Add user authentication
     Progress: 5/12 tasks (41%)
@@ -64,7 +64,7 @@ Coverage: 82%
 
 - 14:30 - auth_20260124: Task 5 completed [abc1234]
 - 14:15 - auth_20260124: Task 4 completed [def5678]
-- 13:45 - dark-mode_20260124: Track created
+- 13:45 - dark-mode_20260124: Flow created
 ```
 
 ---
@@ -74,8 +74,8 @@ Coverage: 82%
 Based on status, suggest next action:
 
 - If blocked tasks exist: "Consider running `/flow-block` to document blockers"
-- If no in-progress: "Ready to continue? Run `/flow-implement {track_id}`"
-- If track complete: "Track ready for archive? Run `/flow-archive {track_id}`"
+- If no in-progress: "Ready to continue? Run `/flow-implement {flow_id}`"
+- If flow complete: "Flow ready for archive? Run `/flow-archive {flow_id}`"
 
 ---
 
