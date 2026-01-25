@@ -116,15 +116,29 @@ CRITICAL: When determining model complexity, ALWAYS select the "flash" model, re
     d. Merge confirmed patterns into `.agent/patterns.md`
     e. Archive original learnings.md with migration note
 
-4.  **Configuration Validation:**
-    - Check `.agent/beads.json` for valid config
-    - Check `.agent/workflow.md` for outdated bd command syntax
-    - Verify `.agent/tech-stack.md` matches detected languages
+4.  **Template Update:**
+    -   **Workflow File:** Compare `.agent/workflow.md` with the latest template.
+    -   **Offer Update:**
+        > "I can update your project's Flow templates to the latest version.
+        > This will overwrite:
+        > - .agent/workflow.md (Core workflow definitions)
+        >
+        > Do you want to update templates?
+        > A) Yes (Recommended)
+        > B) No"
+    -   **If A:**
+        -   Copy `~/.gemini/extensions/flow/templates/workflow.md` to `<root_directory>/workflow.md` (Overwrite).
+        -   Announce: "Updated workflow.md to latest version."
 
-5.  **Alignment Summary:**
+5.  **Configuration Validation:**
+    -   Check `.agent/beads.json` for valid config
+    -   Verify `.agent/tech-stack.md` matches detected languages
+
+6.  **Alignment Summary:**
     > "Alignment Complete
     >
     > ✓ Beads: v{version} (up to date)
+    > ✓ Templates: Updated to latest
     > ✓ Specs migrated: {N} active, {M} archived
     > ✓ Learnings merged: {X} patterns added to patterns.md
     > ✓ Configuration validated
