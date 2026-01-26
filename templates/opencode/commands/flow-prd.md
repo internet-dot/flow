@@ -10,6 +10,28 @@ CRITICAL: You must validate the success of every tool call.
 
 ---
 
+## CRITICAL CONSTRAINT: PLANNING ONLY - NO CODE MODIFICATION
+
+**THIS COMMAND CREATES PLANNING DOCUMENTS ONLY.**
+
+You are STRICTLY FORBIDDEN from:
+
+- Writing, editing, or modifying ANY source code files
+- Creating new code files (*.py, *.ts, *.js, *.rs, etc.)
+- Running implementation commands
+- Making ANY changes outside of `.agent/` directory
+
+You MAY ONLY:
+
+- Create/edit files in `.agent/specs/` (spec.md, plan.md, metadata.json)
+- Create/edit `.agent/flows.md` registry
+- Run `bd create` commands for Beads tracking
+- Read source code for analysis (but NEVER modify it)
+
+**Implementation happens ONLY when user explicitly runs `/flow-implement`.**
+
+---
+
 ## 1.5 BEADS HOOK CHECK
 
 **PROTOCOL: Ensure Beads hooks are installed before proceeding.**
@@ -154,23 +176,26 @@ CRITICAL: You must validate the success of every tool call.
 
 ---
 
-## 6.0 AUTO-PLAN FIRST FLOW
+## 6.0 AUTO-PLAN FIRST FLOW (PLANNING DOCUMENTS ONLY)
 
-**PROTOCOL: Automatically plan the first chapter after PRD creation.**
+**PROTOCOL: Create spec.md and plan.md for the first chapter. NO CODE MODIFICATION.**
+
+**REMINDER: Planning = creating `.agent/specs/` files. NOT writing code.**
 
 1. **Announce Transition:**
 
-    > "PRD created with [N] chapters. Now planning Chapter 1: `<first_flow_id>`"
+    > "PRD created with [N] chapters. Now creating planning documents for Chapter 1: `<first_flow_id>`"
 
-2. **Execute Plan Workflow for First Flow:**
+2. **Execute Plan Workflow for First Flow (READ-ONLY code analysis):**
 
-    **2.1 Code Analysis (MANDATORY):**
+    **2.1 Code Analysis (READ-ONLY - DO NOT MODIFY):**
 
     - Use file search to find files related to the chapter's scope
     - Identify entry points, affected modules, and dependencies
-    - Read key files to understand current implementation
+    - READ key files to understand current implementation
     - Map the code flow related to the problem
     - Note specific file paths and line numbers
+    - **DO NOT EDIT ANY SOURCE CODE FILES**
 
     **2.2 Code Analysis Report:**
 
@@ -185,15 +210,16 @@ CRITICAL: You must validate the success of every tool call.
     - Example BAD: "Is this service provided by DI?"
     - Example GOOD: "I found `workspace_file_service` is injected in `src/services/workspace.py:45` using Dishka's `@inject` decorator. However, the CLI command at `src/cli/ingest.py:23` doesn't have the corresponding `@inject`. Should I add it there?"
 
-    **2.4 Generate Spec and Plan:**
+    **2.4 Generate Spec and Plan (`.agent/specs/` ONLY):**
 
     - Generate `spec.md` with "Code Analysis Summary" section
     - Generate `plan.md` with TDD tasks
     - Create Beads tasks under the chapter's epic
+    - **ONLY write to `.agent/specs/<flow_id>/` - NO other directories**
 
 3. **Summary and Continuation Prompt:**
 
-    > "Chapter 1 (`<first_flow_id>`) planning complete.
+    > "Chapter 1 (`<first_flow_id>`) planning documents created.
     >
     > **Summary:**
     >
@@ -201,7 +227,7 @@ CRITICAL: You must validate the success of every tool call.
     > - Spec: `.agent/specs/<flow_id>/spec.md`
     > - Plan: `.agent/specs/<flow_id>/plan.md` ([N] tasks)
     >
-    > **Next:** Plan Chapter 2 (`<second_flow_id>`)?
+    > **Next:** Create planning documents for Chapter 2 (`<second_flow_id>`)?
     >
     > - **A) Yes** - Continue planning next chapter
     > - **B) No** - Stop here, I'll plan remaining chapters later"
@@ -211,12 +237,17 @@ CRITICAL: You must validate the success of every tool call.
     - If user selects B: End with final summary
     - After last chapter: Announce all chapters planned
 
-5. **Final Summary:**
+5. **Final Summary (HARD STOP):**
 
-    > "All [N] chapters planned.
+    > "**PLANNING COMPLETE - AWAITING IMPLEMENTATION APPROVAL**
     >
-    > Ready to implement? Run:
-    > `/flow-implement <first_flow_id>`"
+    > All [N] chapters have planning documents created.
+    > **NO CODE HAS BEEN MODIFIED.**
+    >
+    > To begin implementation, explicitly run:
+    > `/flow-implement <first_flow_id>`
+    >
+    > I will NOT proceed with any code changes until you run that command."
 
 ---
 
@@ -263,9 +294,11 @@ Append to `.agent/flows.md`:
 
 ## Critical Rules
 
-1. **BEADS REQUIRED** - Check hooks are installed
-2. **FULL CONTEXT** - Always use `--description` and `--notes` with bd create
-3. **ASK FIRST** - Clarifying questions before proposing chapters
-4. **CODE ANALYSIS** - Read actual code before asking flow-specific questions
-5. **AUTO-PLAN** - Automatically plan the first flow after PRD creation
-6. **SPECS DIRECTORY** - All artifacts go in `.agent/specs/`, not `.agent/prd/`
+1. **NO CODE MODIFICATION** - NEVER edit source code files. Planning documents ONLY.
+2. **BEADS REQUIRED** - Check hooks are installed
+3. **FULL CONTEXT** - Always use `--description` and `--notes` with bd create
+4. **ASK FIRST** - Clarifying questions before proposing chapters
+5. **CODE ANALYSIS (READ-ONLY)** - Read actual code before asking flow-specific questions but NEVER modify it
+6. **AUTO-PLAN** - Create spec/plan files for first flow (NOT implementation)
+7. **SPECS DIRECTORY** - All artifacts go in `.agent/specs/`, not `.agent/prd/`
+8. **HARD STOP** - End with explicit instruction to run `/flow-implement`
