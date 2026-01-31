@@ -5,9 +5,9 @@
  */
 
 import { describe, test, expect } from "bun:test";
-import { FLOW_THINK_TOOL } from "./schema.js";
-import { FlowThinkServer } from "./server.js";
-import { getDefaultConfig } from "./config.js";
+import { FLOW_THINK_TOOL } from "../src/schema.js";
+import { FlowThinkServer } from "../src/server.js";
+import { getDefaultConfig } from "../src/config.js";
 
 describe("MCP Integration", () => {
   describe("Tool Schema", () => {

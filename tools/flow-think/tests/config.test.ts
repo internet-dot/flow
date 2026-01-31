@@ -5,7 +5,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { loadConfig, getDefaultConfig } from "./config.js";
+import { loadConfig, getDefaultConfig } from "../src/config.js";
 
 describe("loadConfig", () => {
   const originalEnv = { ...process.env };

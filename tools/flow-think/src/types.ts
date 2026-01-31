@@ -150,6 +150,9 @@ export interface FlowThinkHistory {
   /** ISO timestamp of last update */
   updated_at: string;
 
+  /** Branches in the reasoning tree */
+  branches?: Branch[];
+
   /** Aggregate metadata */
   metadata?: {
     /** Total reasoning duration */
@@ -160,6 +163,8 @@ export interface FlowThinkHistory {
     branches_created?: number;
     /** All tools used across steps */
     tools_used?: string[];
+    /** Current maximum branch depth */
+    max_branch_depth?: number;
   };
 }
 
@@ -253,3 +258,267 @@ export const PURPOSE_TYPES = {
 } as const;
 
 export type StandardPurpose = keyof typeof PURPOSE_TYPES;
+
+// ─────────────────────────────────────────────────────────────
+// Chapter 2: Confidence Tracking Types
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Semantic confidence levels.
+ */
+export type ConfidenceLevel = "low" | "medium" | "high" | "very_high";
+
+/**
+ * Confidence thresholds for categorization.
+ */
+export const CONFIDENCE_THRESHOLDS = {
+  low: 0.3,
+  medium: 0.5,
+  high: 0.8,
+  very_high: 0.95,
+} as const;
+
+/**
+ * Warning generated when confidence is below threshold.
+ */
+export interface ConfidenceWarning {
+  /** Warning severity level */
+  level: "info" | "warning" | "critical";
+  /** Human-readable message */
+  message: string;
+  /** Suggested action to increase confidence */
+  suggestion?: string;
+  /** The confidence value that triggered this warning */
+  confidence: number;
+  /** The threshold that was not met */
+  threshold: number;
+}
+
+/**
+ * Get semantic confidence level from numeric value.
+ */
+export function getConfidenceLevel(confidence: number): ConfidenceLevel {
+  if (confidence >= CONFIDENCE_THRESHOLDS.very_high) return "very_high";
+  if (confidence >= CONFIDENCE_THRESHOLDS.high) return "high";
+  if (confidence >= CONFIDENCE_THRESHOLDS.medium) return "medium";
+  return "low";
+}
+
+// ─────────────────────────────────────────────────────────────
+// Chapter 2: Revision Tracking Types
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Tracks a revision relationship between steps.
+ */
+export interface RevisionInfo {
+  /** Step number that was revised */
+  original_step: number;
+  /** Step number containing the revision */
+  revised_by: number;
+  /** Reason for the revision */
+  reason: string;
+  /** When the revision was made */
+  timestamp: string;
+}
+
+/**
+ * Result of validating a revision request.
+ */
+export interface RevisionValidationResult {
+  /** Whether the revision is valid */
+  valid: boolean;
+  /** Error message if invalid */
+  error?: string;
+}
+
+/**
+ * Validate that a revision target exists.
+ */
+export function validateRevisionTarget(
+  targetStep: number,
+  existingSteps: Set<number>
+): RevisionValidationResult {
+  if (targetStep < 1) {
+    return {
+      valid: false,
+      error: `revises_step must be >= 1, got ${targetStep}`,
+    };
+  }
+  if (!existingSteps.has(targetStep)) {
+    return {
+      valid: false,
+      error: `Cannot revise step ${targetStep}: step does not exist`,
+    };
+  }
+  return { valid: true };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Chapter 2: Branching Types
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Branch status in the reasoning tree.
+ */
+export type BranchStatus = "active" | "merged" | "abandoned";
+
+/**
+ * A branch in the reasoning tree.
+ * Represents an alternative exploration path.
+ */
+export interface Branch {
+  /** Unique branch identifier */
+  id: string;
+  /** Human-readable name */
+  name?: string;
+  /** Step number this branch diverged from */
+  from_step: number;
+  /** Step numbers in this branch */
+  steps: number[];
+  /** Current branch status */
+  status: BranchStatus;
+  /** Nesting depth (0 = main trunk, 1 = first branch, etc.) */
+  depth: number;
+  /** Parent branch ID if nested */
+  parent_branch?: string;
+  /** When branch was created */
+  created_at: string;
+}
+
+/**
+ * Result of validating a branch request.
+ */
+export interface BranchValidationResult {
+  /** Whether the branch is valid */
+  valid: boolean;
+  /** Error message if invalid */
+  error?: string;
+}
+
+/**
+ * Validate a branch request.
+ */
+export function validateBranchRequest(
+  fromStep: number,
+  existingSteps: Set<number>,
+  currentDepth: number,
+  maxDepth: number
+): BranchValidationResult {
+  if (fromStep < 1) {
+    return {
+      valid: false,
+      error: `branch_from must be >= 1, got ${fromStep}`,
+    };
+  }
+  if (!existingSteps.has(fromStep)) {
+    return {
+      valid: false,
+      error: `Cannot branch from step ${fromStep}: step does not exist`,
+    };
+  }
+  if (currentDepth >= maxDepth) {
+    return {
+      valid: false,
+      error: `Maximum branch depth (${maxDepth}) exceeded`,
+    };
+  }
+  return { valid: true };
+}
+
+/**
+ * Generate a unique branch ID.
+ */
+export function generateBranchId(prefix = "branch"): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).slice(2, 6);
+  return `${prefix}-${timestamp}-${random}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Chapter 2: Dependency Tracking Types
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Result of validating dependencies.
+ */
+export interface DependencyValidationResult {
+  /** Whether dependencies are valid */
+  valid: boolean;
+  /** Error message if invalid */
+  error?: string;
+  /** List of invalid step references */
+  invalid_steps?: number[];
+}
+
+/**
+ * Validate step dependencies.
+ */
+export function validateDependencies(
+  stepNumber: number,
+  dependencies: number[],
+  existingSteps: Set<number>
+): DependencyValidationResult {
+  const invalidSteps: number[] = [];
+
+  for (const dep of dependencies) {
+    if (dep < 1) {
+      return {
+        valid: false,
+        error: `Dependency step must be >= 1, got ${dep}`,
+      };
+    }
+    if (dep === stepNumber) {
+      return {
+        valid: false,
+        error: `Step ${stepNumber} cannot depend on itself`,
+      };
+    }
+    if (!existingSteps.has(dep)) {
+      invalidSteps.push(dep);
+    }
+  }
+
+  if (invalidSteps.length > 0) {
+    return {
+      valid: false,
+      error: `Dependencies [${invalidSteps.join(", ")}] do not exist`,
+      invalid_steps: invalidSteps,
+    };
+  }
+
+  return { valid: true };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Chapter 2: Session Management Types
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * A reasoning session containing its own history.
+ */
+export interface SessionEntry {
+  /** Session identifier */
+  id: string;
+  /** History for this session */
+  history: FlowThinkHistory;
+  /** When session was created */
+  created_at: string;
+  /** When session was last accessed */
+  last_accessed: string;
+  /** Step index for this session */
+  stepIndex: Map<number, FlowThinkStep>;
+  /** Step numbers for this session */
+  stepNumbers: Set<number>;
+  /** Branch index for this session */
+  branchIndex: Map<string, Branch>;
+}
+
+/**
+ * Generate a unique session ID.
+ */
+export function generateSessionId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).slice(2, 8);
+  return `session-${timestamp}-${random}`;
+}

@@ -10,6 +10,17 @@ import type {
   FlowThinkConfig,
   ValidationResult,
   MCPResponse,
+  ConfidenceWarning,
+  Branch,
+  SessionEntry,
+} from "./types.js";
+import {
+  getConfidenceLevel,
+  CONFIDENCE_THRESHOLDS,
+  validateRevisionTarget,
+  validateBranchRequest,
+  generateBranchId,
+  validateDependencies,
 } from "./types.js";
 import { FlowThinkFormatter } from "./formatter.js";
 
@@ -42,6 +53,15 @@ export class FlowThinkServer {
   /** Cached step numbers for validation */
   private stepNumbers: Set<number> = new Set();
 
+  /** Branch index for O(1) lookup */
+  private branchIndex: Map<string, Branch> = new Map();
+
+  /** Sessions map for multi-session support */
+  private sessions: Map<string, SessionEntry> = new Map();
+
+  /** Current active session ID (null = default/main) */
+  private currentSessionId: string | null = null;
+
   constructor(config: FlowThinkConfig) {
     this.config = config;
     this.formatter = new FlowThinkFormatter(config.outputFormat === "console");
@@ -58,13 +78,34 @@ export class FlowThinkServer {
       completed: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      branches: [],
       metadata: {
         total_duration_ms: 0,
         revisions_count: 0,
         branches_created: 0,
         tools_used: [],
+        max_branch_depth: 0,
       },
     };
+  }
+
+  /**
+   * Get the depth of a branch (0 for main trunk).
+   */
+  private getBranchDepth(branchId: string | undefined): number {
+    if (!branchId) return 0;
+    const branch = this.branchIndex.get(branchId);
+    if (!branch) return 0;
+    return branch.depth;
+  }
+
+  /**
+   * Get the current branch depth for a step.
+   */
+  private getStepBranchDepth(stepNumber: number): number {
+    const step = this.stepIndex.get(stepNumber);
+    if (!step || !step.branch_id) return 0;
+    return this.getBranchDepth(step.branch_id);
   }
 
   /**
@@ -79,6 +120,57 @@ export class FlowThinkServer {
    */
   private isPositiveInteger(value: unknown): value is number {
     return typeof value === "number" && Number.isInteger(value) && value >= 1;
+  }
+
+  /**
+   * Validate confidence value if provided.
+   * Returns error message if invalid, null if valid or not provided.
+   */
+  private validateConfidence(step: Record<string, unknown>): string | null {
+    if (step.confidence === undefined) return null;
+
+    const confidence = step.confidence;
+    if (typeof confidence !== "number") {
+      return "confidence must be a number";
+    }
+    if (confidence < 0 || confidence > 1) {
+      return `confidence must be between 0 and 1, got ${confidence}`;
+    }
+    return null;
+  }
+
+  /**
+   * Generate warning for low confidence.
+   */
+  private generateConfidenceWarning(confidence: number): ConfidenceWarning | null {
+    const threshold = this.config.lowConfidenceThreshold ?? 0.5;
+    if (confidence >= threshold) return null;
+
+    const level = getConfidenceLevel(confidence);
+    // Critical if confidence is less than 20% (very uncertain)
+    const isCritical = confidence < 0.2;
+
+    return {
+      level: isCritical ? "critical" : "warning",
+      message: `Low confidence (${Math.round(confidence * 100)}%) - below threshold of ${Math.round(threshold * 100)}%`,
+      suggestion: this.getConfidenceSuggestion(level),
+      confidence,
+      threshold,
+    };
+  }
+
+  /**
+   * Get suggestion based on confidence level.
+   */
+  private getConfidenceSuggestion(level: string): string {
+    switch (level) {
+      case "low":
+        return "Consider gathering more information or breaking the problem into smaller parts";
+      case "medium":
+        return "You may want to verify assumptions before proceeding";
+      default:
+        return "Review your reasoning to identify uncertainties";
+    }
   }
 
   /**
@@ -187,6 +279,13 @@ export class FlowThinkServer {
     const stepStartTime = Date.now();
 
     try {
+      // Get session_id early to switch context before validation
+      const inputObj = input as Record<string, unknown>;
+      const sessionId = inputObj.session_id as string | undefined;
+
+      // Switch to session context (affects stepNumbers, stepIndex, etc.)
+      this.switchToSession(sessionId);
+
       // Validate required fields
       const validation = this.validateRequiredFields(input);
       if (!validation.valid) {
@@ -209,7 +308,127 @@ export class FlowThinkServer {
         };
       }
 
+      // Validate confidence if provided
+      const confidenceError = this.validateConfidence(input as Record<string, unknown>);
+      if (confidenceError) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  error: confidenceError,
+                  status: "failed",
+                },
+                null,
+                2
+              ),
+            },
+          ],
+          isError: true,
+        };
+      }
+
       const step = input as FlowThinkStep;
+
+      // Check for low confidence and generate warning
+      let confidenceWarning: ConfidenceWarning | null = null;
+      if (step.confidence !== undefined) {
+        confidenceWarning = this.generateConfidenceWarning(step.confidence);
+        if (confidenceWarning) {
+          const emoji = confidenceWarning.level === "critical" ? "🚨" : "⚠️";
+          console.error(`${emoji} ${confidenceWarning.message}`);
+          if (confidenceWarning.suggestion) {
+            console.error(`   💡 ${confidenceWarning.suggestion}`);
+          }
+        }
+      }
+
+      // Validate revision target if provided
+      if (step.revises_step !== undefined) {
+        const revisionResult = validateRevisionTarget(step.revises_step, this.stepNumbers);
+        if (!revisionResult.valid) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    error: revisionResult.error,
+                    status: "failed",
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
+
+      // Validate branch request if provided
+      if (step.branch_from !== undefined) {
+        const currentDepth = this.getStepBranchDepth(step.branch_from);
+        const maxDepth = this.config.maxBranchDepth ?? 5;
+        const branchResult = validateBranchRequest(
+          step.branch_from,
+          this.stepNumbers,
+          currentDepth,
+          maxDepth
+        );
+        if (!branchResult.valid) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    error: branchResult.error,
+                    status: "failed",
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // Auto-generate branch_id if not provided
+        if (!step.branch_id) {
+          step.branch_id = generateBranchId();
+        }
+      }
+
+      // Validate dependencies if provided
+      if (step.dependencies && step.dependencies.length > 0) {
+        const depResult = validateDependencies(
+          step.step_number,
+          step.dependencies,
+          this.stepNumbers
+        );
+        if (!depResult.valid) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    error: depResult.error,
+                    status: "failed",
+                    invalid_steps: depResult.invalid_steps,
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
 
       // Add timestamp
       step.timestamp = new Date().toISOString();
@@ -229,6 +448,78 @@ export class FlowThinkServer {
           existing.add(tool);
         }
         this.history.metadata.tools_used = [...existing];
+      }
+
+      // Handle revision: mark original step as revised
+      if (step.revises_step !== undefined) {
+        const originalStep = this.stepIndex.get(step.revises_step);
+        if (originalStep) {
+          originalStep.revised_by = step.step_number;
+        }
+        // Increment revisions count
+        if (this.history.metadata) {
+          this.history.metadata.revisions_count =
+            (this.history.metadata.revisions_count ?? 0) + 1;
+        }
+        console.error(`🔄 Step ${step.step_number} revises step ${step.revises_step}`);
+      }
+
+      // Log hypothesis verification state changes
+      if (step.hypothesis && step.verification_status) {
+        const emoji =
+          step.verification_status === "confirmed"
+            ? "✅"
+            : step.verification_status === "refuted"
+              ? "❌"
+              : "🔬";
+        console.error(`${emoji} Hypothesis: "${step.hypothesis}" [${step.verification_status}]`);
+      }
+
+      // Handle branching: create or update branch
+      if (step.branch_id) {
+        let branch = this.branchIndex.get(step.branch_id);
+        if (!branch) {
+          // New branch
+          const parentStep = step.branch_from !== undefined
+            ? this.stepIndex.get(step.branch_from)
+            : undefined;
+          const parentBranch = parentStep?.branch_id;
+          const depth = step.branch_from !== undefined
+            ? this.getStepBranchDepth(step.branch_from) + 1
+            : 0;
+
+          branch = {
+            id: step.branch_id,
+            name: step.branch_name,
+            from_step: step.branch_from ?? 0,
+            steps: [step.step_number],
+            status: "active",
+            depth,
+            parent_branch: parentBranch,
+            created_at: new Date().toISOString(),
+          };
+
+          this.branchIndex.set(step.branch_id, branch);
+          if (!this.history.branches) {
+            this.history.branches = [];
+          }
+          this.history.branches.push(branch);
+
+          // Increment branches count
+          if (this.history.metadata) {
+            this.history.metadata.branches_created =
+              (this.history.metadata.branches_created ?? 0) + 1;
+            this.history.metadata.max_branch_depth = Math.max(
+              this.history.metadata.max_branch_depth ?? 0,
+              depth
+            );
+          }
+
+          console.error(`🌿 Created branch "${step.branch_name || step.branch_id}" from step ${step.branch_from}`);
+        } else {
+          // Existing branch - add step
+          branch.steps.push(step.step_number);
+        }
       }
 
       // Add to history and indexes
@@ -265,6 +556,9 @@ export class FlowThinkServer {
       // Add optional response fields
       if (step.confidence !== undefined) {
         response.confidence = step.confidence;
+        if (confidenceWarning) {
+          response.warning = confidenceWarning;
+        }
       }
       if (step.hypothesis) {
         response.hypothesis = {
@@ -274,6 +568,10 @@ export class FlowThinkServer {
       }
       if (step.revises_step) {
         response.revised_step = step.revises_step;
+        response.revision = {
+          revises: step.revises_step,
+          reason: step.revision_reason,
+        };
       }
       if (step.branch_id) {
         response.branch = {
@@ -281,6 +579,12 @@ export class FlowThinkServer {
           name: step.branch_name,
           from: step.branch_from,
         };
+      }
+      if (step.dependencies && step.dependencies.length > 0) {
+        response.dependencies = step.dependencies;
+      }
+      if (step.session_id) {
+        response.session_id = step.session_id;
       }
 
       return {
@@ -321,6 +625,7 @@ export class FlowThinkServer {
     this.history = this.createNewHistory();
     this.stepIndex.clear();
     this.stepNumbers.clear();
+    this.branchIndex.clear();
     this.startTime = Date.now();
     console.error("🔄 Flow Think history cleared");
   }
@@ -351,6 +656,92 @@ export class FlowThinkServer {
    */
   getHistorySummary(): string {
     return this.formatter.formatHistorySummary(this.history);
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Session Management
+  // ─────────────────────────────────────────────────────────────
+
+  /**
+   * Get or create a session by ID.
+   */
+  private getOrCreateSession(sessionId: string): SessionEntry {
+    let session = this.sessions.get(sessionId);
+    if (!session) {
+      session = {
+        id: sessionId,
+        history: this.createNewHistory(),
+        created_at: new Date().toISOString(),
+        last_accessed: new Date().toISOString(),
+        stepIndex: new Map(),
+        stepNumbers: new Set(),
+        branchIndex: new Map(),
+      };
+      this.sessions.set(sessionId, session);
+      console.error(`📦 Created new session: ${sessionId}`);
+    }
+    session.last_accessed = new Date().toISOString();
+    return session;
+  }
+
+  /**
+   * Switch to a session's context.
+   */
+  private switchToSession(sessionId: string | undefined): void {
+    if (!sessionId) {
+      // Use default session (main history)
+      this.currentSessionId = null;
+      return;
+    }
+
+    if (this.currentSessionId === sessionId) {
+      return; // Already in this session
+    }
+
+    const session = this.getOrCreateSession(sessionId);
+    this.currentSessionId = sessionId;
+
+    // Switch context to session's indexes
+    this.history = session.history;
+    this.stepIndex = session.stepIndex;
+    this.stepNumbers = session.stepNumbers;
+    this.branchIndex = session.branchIndex;
+  }
+
+  /**
+   * Get history for a specific session.
+   */
+  getSessionHistory(sessionId: string): FlowThinkHistory | undefined {
+    const session = this.sessions.get(sessionId);
+    return session?.history;
+  }
+
+  /**
+   * List all sessions.
+   */
+  listSessions(): Array<{ id: string; created_at: string; last_accessed: string; step_count: number }> {
+    return Array.from(this.sessions.values()).map((session) => ({
+      id: session.id,
+      created_at: session.created_at,
+      last_accessed: session.last_accessed,
+      step_count: session.history.steps.length,
+    }));
+  }
+
+  /**
+   * Clear a specific session.
+   */
+  clearSession(sessionId: string): boolean {
+    const deleted = this.sessions.delete(sessionId);
+    if (deleted && this.currentSessionId === sessionId) {
+      // Reset to default
+      this.currentSessionId = null;
+      this.history = this.createNewHistory();
+      this.stepIndex.clear();
+      this.stepNumbers.clear();
+      this.branchIndex.clear();
+    }
+    return deleted;
   }
 
   /**

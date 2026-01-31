@@ -5,8 +5,8 @@
  */
 
 import { describe, test, expect } from "bun:test";
-import { FlowThinkFormatter } from "./formatter.js";
-import type { FlowThinkStep, FlowThinkHistory } from "./types.js";
+import { FlowThinkFormatter } from "../src/formatter.js";
+import type { FlowThinkStep, FlowThinkHistory } from "../src/types.js";
 
 function createStep(overrides: Partial<FlowThinkStep> = {}): FlowThinkStep {
   return {

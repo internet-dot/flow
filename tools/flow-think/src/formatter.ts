@@ -162,6 +162,20 @@ export class FlowThinkFormatter {
       lines.push(branchStr);
     }
 
+    if (step.dependencies && step.dependencies.length > 0) {
+      const depsStr = this.colorOutput
+        ? color(`Depends on: [${step.dependencies.join(", ")}]`, "dim")
+        : `Depends on: [${step.dependencies.join(", ")}]`;
+      lines.push(depsStr);
+    }
+
+    if (step.session_id) {
+      const sessionStr = this.colorOutput
+        ? color(`Session: ${step.session_id}`, "dim")
+        : `Session: ${step.session_id}`;
+      lines.push(sessionStr);
+    }
+
     if (step.is_final_step) {
       const finalStr = this.colorOutput
         ? color("✓ FINAL STEP", "green", "bold")
@@ -233,6 +247,12 @@ export class FlowThinkFormatter {
     }
     if (step.branch_id) {
       metadata.push(`Branch: ${step.branch_name ?? step.branch_id}`);
+    }
+    if (step.dependencies && step.dependencies.length > 0) {
+      metadata.push(`Depends: [${step.dependencies.join(", ")}]`);
+    }
+    if (step.session_id) {
+      metadata.push(`Session: ${step.session_id}`);
     }
     if (step.is_final_step) {
       metadata.push("**FINAL STEP**");
