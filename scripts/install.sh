@@ -550,6 +550,34 @@ install_codex() {
         fi
     done
 
+    # Install MCP configuration for flow-think server
+    local mcp_config_src="$TEMPLATES_DIR/codex/mcp-config.toml"
+    local config_dst="$CODEX_DIR/config.toml"
+
+    if [[ -f "$mcp_config_src" ]]; then
+        if [[ -f "$config_dst" ]]; then
+            if grep -q "mcp_servers.flow-think" "$config_dst" 2>/dev/null; then
+                log_info "MCP config: flow-think already configured"
+            else
+                # Backup existing config
+                backup_file "$config_dst"
+                # Append MCP configuration
+                echo "" >> "$config_dst"
+                echo "# --- Flow Framework MCP Configuration ---" >> "$config_dst"
+                cat "$mcp_config_src" >> "$config_dst"
+                # Replace placeholder with actual install path
+                sed -i "s|\${FLOW_INSTALL_PATH}|$SCRIPT_DIR|g" "$config_dst"
+                log_success "MCP config: Added flow-think server to config.toml"
+            fi
+        else
+            # Create new config with MCP settings
+            cp "$mcp_config_src" "$config_dst"
+            # Replace placeholder with actual install path
+            sed -i "s|\${FLOW_INSTALL_PATH}|$SCRIPT_DIR|g" "$config_dst"
+            log_success "MCP config: Created config.toml with flow-think server"
+        fi
+    fi
+
     echo ""
     log_success "Codex CLI installation complete"
 }
@@ -622,56 +650,191 @@ install_gemini() {
     echo -e "${CYAN}Installing Flow for Gemini CLI...${NC}"
     echo ""
 
-    # Create directories
-    mkdir -p "$GEMINI_EXT_DIR/commands/flow"
-    mkdir -p "$GEMINI_EXT_DIR/templates"
-    mkdir -p "$GEMINI_DIR/skills"
+    # Create extension directory
+    mkdir -p "$GEMINI_EXT_DIR"
 
     # Backup existing
     backup_dir "$GEMINI_EXT_DIR"
-    backup_dir "$GEMINI_DIR/skills"
 
-    # Install extension manifest
+    # Install extension manifest and context
     cp "$SCRIPT_DIR/gemini-extension.json" "$GEMINI_EXT_DIR/"
-    log_success "Installed: gemini-extension.json"
-    
-    # Install GEMINI.md context
     cp "$SCRIPT_DIR/GEMINI.md" "$GEMINI_EXT_DIR/"
-    log_success "Installed: GEMINI.md"
+    log_success "Installed: extension manifest and context"
 
     # Install commands
-    # Copy commands directory to extension directory
+    mkdir -p "$GEMINI_EXT_DIR/commands"
     cp -r "$SCRIPT_DIR/commands/flow" "$GEMINI_EXT_DIR/commands/"
     log_success "Installed: Flow commands"
 
     # Install templates
+    mkdir -p "$GEMINI_EXT_DIR/templates"
     cp -r "$TEMPLATES_DIR"/* "$GEMINI_EXT_DIR/templates/"
     log_success "Installed: Templates"
 
-    # Install skills (all) to main Gemini skills dir with intelligent merge
-    local skills_src="$SKILLS_DIR"
-    local skills_dst="$GEMINI_DIR/skills"
+    # Install skills (all) to the extension directory
+    # Gemini CLI automatically discovers and registers skills within extensions
+    mkdir -p "$GEMINI_EXT_DIR/skills"
+    cp -r "$SKILLS_DIR"/* "$GEMINI_EXT_DIR/skills/"
+    log_success "Installed: Skills"
 
-    if [[ -d "$skills_src" ]]; then
-        for skill_dir in "$skills_src"/*/; do
-            local skill_name="$(basename "$skill_dir")"
-            local skill_dst_dir="$skills_dst/$skill_name"
-
-            mkdir -p "$skill_dst_dir"
-
-            # Process each file in the skill directory
-            for skill_file in "$skill_dir"*; do
-                [[ -f "$skill_file" ]] || continue
-                local file_name="$(basename "$skill_file")"
-                local dest_file="$skill_dst_dir/$file_name"
-
-                merge_or_install_file "$skill_file" "$dest_file"
-            done
-        done
+    # Install flow-think MCP server
+    # The gemini-extension.json references this via ${extensionPath}/tools/flow-think
+    local TOOLS_DIR="$SCRIPT_DIR/tools"
+    if [[ -d "$TOOLS_DIR/flow-think" ]]; then
+        mkdir -p "$GEMINI_EXT_DIR/tools/flow-think"
+        cp -r "$TOOLS_DIR/flow-think/dist" "$GEMINI_EXT_DIR/tools/flow-think/"
+        cp "$TOOLS_DIR/flow-think/package.json" "$GEMINI_EXT_DIR/tools/flow-think/"
+        log_success "Installed: flow-think MCP server"
+        echo "         Tool available as: mcp__flow-think__flow_think"
+    else
+        log_warn "flow-think MCP server not found (build it first with: cd tools/flow-think && bun run build)"
     fi
 
     echo ""
     log_success "Gemini CLI installation complete"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MCP Installation
+# ─────────────────────────────────────────────────────────────────────────────
+
+install_mcp() {
+    echo ""
+    echo -e "${CYAN}Installing Flow Think MCP Server...${NC}"
+    echo ""
+
+    local mcp_src="$SCRIPT_DIR/tools/flow-think"
+    local mcp_dst="$FLOW_DATA_DIR/mcp/flow-think"
+
+    # Check if flow-think exists
+    if [[ ! -d "$mcp_src" ]]; then
+        log_warn "Flow Think MCP source not found: $mcp_src"
+        log_info "Skipping MCP installation"
+        return
+    fi
+
+    # Check if built
+    if [[ ! -f "$mcp_src/dist/index.js" ]]; then
+        log_info "Building Flow Think MCP..."
+        if command -v bun &>/dev/null; then
+            (cd "$mcp_src" && bun install && bun run build) || {
+                log_warn "Failed to build MCP with Bun, trying npm..."
+                (cd "$mcp_src" && npm install && npm run build) || {
+                    log_error "Failed to build Flow Think MCP"
+                    return
+                }
+            }
+        elif command -v npm &>/dev/null; then
+            (cd "$mcp_src" && npm install && npm run build) || {
+                log_error "Failed to build Flow Think MCP"
+                return
+            }
+        else
+            log_error "Neither Bun nor npm available. Cannot build MCP."
+            return
+        fi
+    fi
+
+    # Create destination directory
+    mkdir -p "$mcp_dst"
+
+    # Copy distribution files
+    cp -r "$mcp_src/dist" "$mcp_dst/"
+    cp "$mcp_src/package.json" "$mcp_dst/"
+    cp "$mcp_src/README.md" "$mcp_dst/" 2>/dev/null || true
+
+    log_success "Installed: Flow Think MCP to $mcp_dst"
+
+    # Install dependencies
+    if [[ ! -d "$mcp_dst/node_modules" ]]; then
+        log_info "Installing MCP dependencies..."
+        if command -v bun &>/dev/null; then
+            (cd "$mcp_dst" && bun install --production 2>/dev/null) || true
+        elif command -v npm &>/dev/null; then
+            (cd "$mcp_dst" && npm install --production 2>/dev/null) || true
+        fi
+    fi
+
+    # Detect runtime
+    local runtime="node"
+    if command -v bun &>/dev/null; then
+        runtime="bun"
+    fi
+
+    echo ""
+    log_success "Flow Think MCP installed"
+    log_info "Runtime: $runtime"
+    log_info "Path: $mcp_dst/dist/index.js"
+}
+
+configure_mcp_for_claude() {
+    local claude_json="$HOME/.claude.json"
+    local mcp_config="$TEMPLATES_DIR/claude/mcp-config.json"
+
+    if [[ ! -f "$mcp_config" ]]; then
+        log_warn "Claude MCP config template not found"
+        return
+    fi
+
+    log_info "Configuring MCP for Claude Code..."
+
+    # Determine runtime
+    local runtime="node"
+    if command -v bun &>/dev/null; then
+        runtime="bun"
+    fi
+
+    if [[ -f "$claude_json" ]]; then
+        backup_file "$claude_json"
+
+        if command -v jq &>/dev/null; then
+            # Extract mcpServers from our config
+            local our_mcp
+            our_mcp=$(jq '.mcpServers' "$mcp_config")
+
+            # Update command based on runtime
+            if [[ "$runtime" == "node" ]]; then
+                our_mcp=$(echo "$our_mcp" | jq '.["flow-think"].command = "node"')
+            fi
+
+            # Merge with existing
+            local temp_file
+            temp_file=$(mktemp)
+            jq --argjson mcp "$our_mcp" '.mcpServers = (.mcpServers // {}) + $mcp' "$claude_json" > "$temp_file" && mv "$temp_file" "$claude_json"
+            log_success "Merged: MCP configuration into ~/.claude.json"
+        else
+            log_warn "jq not installed - manual MCP config required"
+            echo "         Add to ~/.claude.json:"
+            echo '         "mcpServers": { "flow-think": { "command": "'$runtime'", "args": ["run", "~/.flow/mcp/flow-think/dist/index.js"] } }'
+        fi
+    else
+        # Create new claude.json
+        if command -v jq &>/dev/null; then
+            local mcp_json
+            if [[ "$runtime" == "bun" ]]; then
+                mcp_json=$(jq '{mcpServers: .mcpServers}' "$mcp_config")
+            else
+                mcp_json=$(jq '.mcpServers["flow-think"].command = "node" | {mcpServers: .mcpServers}' "$mcp_config")
+            fi
+            echo "$mcp_json" > "$claude_json"
+            log_success "Created: ~/.claude.json with MCP configuration"
+        else
+            cat > "$claude_json" << EOF
+{
+  "mcpServers": {
+    "flow-think": {
+      "command": "$runtime",
+      "args": ["run", "~/.flow/mcp/flow-think/dist/index.js"],
+      "env": {
+        "FLOW_MCP_BEADS_SYNC": "true"
+      }
+    }
+  }
+}
+EOF
+            log_success "Created: ~/.claude.json with MCP configuration"
+        fi
+    fi
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -824,6 +987,12 @@ main() {
     $CODEX_INSTALLED && install_codex
     $OPENCODE_INSTALLED && install_opencode
     $GEMINI_INSTALLED && install_gemini
+
+    # Install MCP server
+    install_mcp
+
+    # Configure MCP for Claude Code
+    $CLAUDE_INSTALLED && configure_mcp_for_claude
 
     # Check Beads
     check_beads

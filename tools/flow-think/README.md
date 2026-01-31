@@ -66,6 +66,52 @@ Or using the built version:
 }
 ```
 
+### Gemini CLI Integration
+
+When installed via the Flow extension, the MCP server is automatically configured in `gemini-extension.json`. The tool is available as `mcp__flow-think__flow_think`.
+
+**Extension Configuration** (in `gemini-extension.json`):
+
+```json
+{
+  "mcpServers": {
+    "flow-think": {
+      "command": "node",
+      "args": ["${extensionPath}${/}tools${/}flow-think${/}dist${/}index.js"],
+      "cwd": "${extensionPath}",
+      "env": {
+        "FLOW_MCP_OUTPUT_FORMAT": "console",
+        "FLOW_MCP_BEADS_SYNC": "true"
+      }
+    }
+  }
+}
+```
+
+**Gemini-Specific Considerations:**
+
+1. **Path Variables**: Gemini CLI uses `${extensionPath}` to reference the extension installation directory and `${/}` as a cross-platform path separator
+2. **Tool Naming**: In Gemini CLI, the tool is accessed as `mcp__flow-think__flow_think` (format: `mcp__<server>__<tool>`)
+3. **Environment Variables**: Configure behavior via the `env` object in the MCP server config
+4. **Trust Mode**: Unlike Claude Code, Gemini CLI MCP servers in extensions cannot use `trust: true` - all tool calls require confirmation unless globally disabled
+
+**Manual Configuration** (in `~/.gemini/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "flow-think": {
+      "command": "node",
+      "args": ["/path/to/flow/tools/flow-think/dist/index.js"],
+      "env": {
+        "FLOW_MCP_OUTPUT_FORMAT": "console",
+        "FLOW_MCP_BEADS_SYNC": "true"
+      }
+    }
+  }
+}
+```
+
 ### Tool: `flow_think`
 
 Record structured reasoning steps for complex problem-solving.

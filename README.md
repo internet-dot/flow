@@ -20,6 +20,7 @@ Control your code. By treating context as a managed artifact alongside your code
 - **Track Management**: Block, skip, revise, archive with full audit trail
 - **Git-Aware Revert**: Understands logical units of work, not just commits
 - **Parallel Execution**: Phase-level task parallelism via sub-agents
+- **MCP Server**: Structured thinking capabilities via Flow Think
 
 ## Quick Start
 
@@ -278,6 +279,62 @@ Flow includes 50+ technology-specific skills in `skills/`:
 | **Tools** | Vite, Tailwind, Shadcn, HTMX |
 
 Copy to your CLI's skills directory for auto-activation.
+
+## Flow Think MCP
+
+Flow includes an MCP (Model Context Protocol) server for structured thinking capabilities:
+
+- **Structured Reasoning**: Multi-step problem-solving with purpose, context, thought, and outcome tracking
+- **Confidence Scoring**: 0-1 scale confidence with threshold warnings
+- **Hypothesis Verification**: Track and verify hypotheses through reasoning chains
+- **Beads Integration**: Link reasoning steps to Beads tasks for persistent context
+- **Session Management**: Cross-session restoration and history tracking
+
+### Quick Start
+
+```bash
+cd tools/flow-think
+bun install
+bun run build
+bun run start
+```
+
+### MCP Configuration
+
+The installer automatically configures MCP for Claude Code. For manual setup, add to `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "flow-think": {
+      "command": "bun",
+      "args": ["run", "~/.flow/mcp/flow-think/dist/index.js"],
+      "env": {
+        "FLOW_MCP_BEADS_SYNC": "true"
+      }
+    }
+  }
+}
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FLOW_MCP_OUTPUT_FORMAT` | `console` | Output format: console, json, markdown |
+| `FLOW_MCP_MAX_HISTORY` | `100` | Maximum steps to retain |
+| `FLOW_MCP_SESSION_TIMEOUT` | `60` | Session timeout in minutes |
+| `FLOW_MCP_BEADS_SYNC` | `true` | Enable Beads integration |
+| `FLOW_MCP_LOW_CONFIDENCE` | `0.5` | Low confidence threshold |
+
+### Verification
+
+```bash
+cd tools/flow-think
+bun run src/doctor.ts
+```
+
+See [tools/flow-think/README.md](tools/flow-think/README.md) for detailed usage and integration examples.
 
 ## Documentation
 
