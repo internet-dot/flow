@@ -23,6 +23,7 @@ import {
   validateDependencies,
 } from "./types.js";
 import { FlowThinkFormatter } from "./formatter.js";
+import { SafeBeadsWrapper } from "./beads/index.js";
 
 /**
  * Completion phrases that indicate reasoning is done.
@@ -62,11 +63,17 @@ export class FlowThinkServer {
   /** Current active session ID (null = default/main) */
   private currentSessionId: string | null = null;
 
+  /** Beads integration wrapper */
+  private beads: SafeBeadsWrapper;
+
   constructor(config: FlowThinkConfig) {
     this.config = config;
     this.formatter = new FlowThinkFormatter(config.outputFormat === "console");
     this.history = this.createNewHistory();
     this.startTime = Date.now();
+    this.beads = new SafeBeadsWrapper({
+      enabled: config.beadsSync ?? true,
+    });
   }
 
   /**
@@ -543,6 +550,12 @@ export class FlowThinkServer {
       const formattedOutput = this.formatter.format(step, this.config.outputFormat);
       console.error(formattedOutput);
 
+      // Sync to Beads (fire-and-forget, non-blocking)
+      // Don't await - let it run in background
+      this.beads.syncStep(step, step.session_id, step.beads_task_id).catch(() => {
+        // Errors are handled internally by SafeBeadsWrapper
+      });
+
       // Build response
       const response: Record<string, unknown> = {
         status: this.history.completed ? "flow_think_complete" : "flow_think_in_progress",
@@ -760,5 +773,58 @@ export class FlowThinkServer {
       default:
         return JSON.stringify(this.history, null, 2);
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Beads Integration
+  // ─────────────────────────────────────────────────────────────
+
+  /**
+   * Register a session with a Beads epic.
+   */
+  registerBeadsEpic(sessionId: string, epicId: string): void {
+    this.beads.registerSession(sessionId, epicId);
+  }
+
+  /**
+   * Get Beads sync statistics.
+   */
+  getBeadsStats(): ReturnType<SafeBeadsWrapper["getStats"]> {
+    return this.beads.getStats();
+  }
+
+  /**
+   * Check if Beads is available.
+   */
+  async isBeadsAvailable(): Promise<boolean> {
+    return this.beads.isAvailable();
+  }
+
+  /**
+   * Restore reasoning context from Beads epic.
+   */
+  async restoreFromBeads(epicId: string): Promise<{
+    success: boolean;
+    steps_restored: number;
+    context_summary?: string;
+  }> {
+    const result = await this.beads.restoreContext(epicId);
+
+    if (!result.success || !result.data) {
+      return {
+        success: false,
+        steps_restored: 0,
+      };
+    }
+
+    const summary = result.data.steps
+      ? this.beads.createContextSummary(result.data.steps)
+      : undefined;
+
+    return {
+      success: true,
+      steps_restored: result.data.steps_restored,
+      context_summary: summary,
+    };
   }
 }
