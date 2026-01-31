@@ -154,7 +154,7 @@ export class BeadsSessionManager {
   resolveEpicId(
     sessionId: string,
     stepEpicId?: string,
-    flowId?: string
+    _flowId?: string
   ): string | undefined {
     // Priority: step-level override > registered mapping > flow-based lookup
     if (stepEpicId) {

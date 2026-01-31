@@ -4,7 +4,7 @@
  * Restores previous reasoning context from Beads notes.
  */
 
-import type { FlowThinkStep, FlowThinkHistory } from "../types.js";
+import type { FlowThinkStep } from "../types.js";
 import { BeadsDetection } from "./detection.js";
 import { parseBeadsNote } from "./types.js";
 

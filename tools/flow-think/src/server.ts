@@ -16,7 +16,6 @@ import type {
 } from "./types.js";
 import {
   getConfidenceLevel,
-  CONFIDENCE_THRESHOLDS,
   validateRevisionTarget,
   validateBranchRequest,
   generateBranchId,
