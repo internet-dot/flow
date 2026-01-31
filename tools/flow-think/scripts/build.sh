@@ -30,16 +30,20 @@ if command -v bun &> /dev/null; then
     # Create dist directory
     mkdir -p dist
 
-    # Bundle with Bun - single file output
-    # --target=node ensures Node.js compatibility
-    # --external marks dependencies that should not be bundled
-    echo "    Bundling TypeScript to single file..."
+    # Build standalone executable with embedded Bun runtime
+    echo "    Building standalone executable..."
+    bun build src/index.ts \
+        --compile \
+        --minify \
+        --outfile dist/flow-think-mcp
+
+    # Also create JS bundle for Node.js fallback
+    echo "    Building JS bundle for Node.js fallback..."
     bun build src/index.ts \
         --outfile dist/index.js \
         --target node \
         --format esm \
-        --minify \
-        --external @modelcontextprotocol/sdk
+        --minify
 
     # Also generate type declarations using tsc
     echo "    Generating type declarations..."

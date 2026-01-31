@@ -677,17 +677,28 @@ install_gemini() {
     cp -r "$SKILLS_DIR"/* "$GEMINI_EXT_DIR/skills/"
     log_success "Installed: Skills"
 
-    # Install flow-think MCP server
-    # The gemini-extension.json references this via ${extensionPath}/tools/flow-think
+    # Install flow-think MCP server (standalone executable)
     local TOOLS_DIR="$SCRIPT_DIR/tools"
     if [[ -d "$TOOLS_DIR/flow-think" ]]; then
-        mkdir -p "$GEMINI_EXT_DIR/tools/flow-think"
-        cp -r "$TOOLS_DIR/flow-think/dist" "$GEMINI_EXT_DIR/tools/flow-think/"
-        cp "$TOOLS_DIR/flow-think/package.json" "$GEMINI_EXT_DIR/tools/flow-think/"
-        log_success "Installed: flow-think MCP server"
+        local mcp_exe="$TOOLS_DIR/flow-think/dist/flow-think-mcp"
+
+        # Build if executable doesn't exist
+        if [[ ! -f "$mcp_exe" ]]; then
+            log_info "Building flow-think MCP server..."
+            (cd "$TOOLS_DIR/flow-think" && ./scripts/build.sh) || {
+                log_warn "Failed to build flow-think MCP server"
+                return
+            }
+        fi
+
+        # Copy standalone executable
+        mkdir -p "$GEMINI_EXT_DIR/tools/flow-think/dist"
+        cp "$mcp_exe" "$GEMINI_EXT_DIR/tools/flow-think/dist/"
+        chmod +x "$GEMINI_EXT_DIR/tools/flow-think/dist/flow-think-mcp"
+        log_success "Installed: flow-think MCP server (standalone executable)"
         echo "         Tool available as: mcp__flow-think__flow_think"
     else
-        log_warn "flow-think MCP server not found (build it first with: cd tools/flow-think && bun run build)"
+        log_warn "flow-think MCP server not found"
     fi
 
     echo ""
@@ -705,6 +716,7 @@ install_mcp() {
 
     local mcp_src="$SCRIPT_DIR/tools/flow-think"
     local mcp_dst="$FLOW_DATA_DIR/mcp/flow-think"
+    local mcp_exe="$mcp_src/dist/flow-think-mcp"
 
     # Check if flow-think exists
     if [[ ! -d "$mcp_src" ]]; then
@@ -713,24 +725,17 @@ install_mcp() {
         return
     fi
 
-    # Check if built
-    if [[ ! -f "$mcp_src/dist/index.js" ]]; then
-        log_info "Building Flow Think MCP..."
+    # Build standalone executable if it doesn't exist
+    if [[ ! -f "$mcp_exe" ]]; then
+        log_info "Building Flow Think MCP (standalone executable)..."
         if command -v bun &>/dev/null; then
-            (cd "$mcp_src" && bun install && bun run build) || {
-                log_warn "Failed to build MCP with Bun, trying npm..."
-                (cd "$mcp_src" && npm install && npm run build) || {
-                    log_error "Failed to build Flow Think MCP"
-                    return
-                }
-            }
-        elif command -v npm &>/dev/null; then
-            (cd "$mcp_src" && npm install && npm run build) || {
+            (cd "$mcp_src" && bun install && ./scripts/build.sh) || {
                 log_error "Failed to build Flow Think MCP"
                 return
             }
         else
-            log_error "Neither Bun nor npm available. Cannot build MCP."
+            log_error "Bun required for standalone executable build"
+            log_info "Install Bun: curl -fsSL https://bun.sh/install | bash"
             return
         fi
     fi
@@ -738,93 +743,64 @@ install_mcp() {
     # Create destination directory
     mkdir -p "$mcp_dst"
 
-    # Copy distribution files
-    cp -r "$mcp_src/dist" "$mcp_dst/"
-    cp "$mcp_src/package.json" "$mcp_dst/"
-    cp "$mcp_src/README.md" "$mcp_dst/" 2>/dev/null || true
-
-    log_success "Installed: Flow Think MCP to $mcp_dst"
-
-    # Install dependencies
-    if [[ ! -d "$mcp_dst/node_modules" ]]; then
-        log_info "Installing MCP dependencies..."
-        if command -v bun &>/dev/null; then
-            (cd "$mcp_dst" && bun install --production 2>/dev/null) || true
-        elif command -v npm &>/dev/null; then
-            (cd "$mcp_dst" && npm install --production 2>/dev/null) || true
-        fi
-    fi
-
-    # Detect runtime
-    local runtime="node"
-    if command -v bun &>/dev/null; then
-        runtime="bun"
-    fi
+    # Copy standalone executable only
+    cp "$mcp_exe" "$mcp_dst/"
+    chmod +x "$mcp_dst/flow-think-mcp"
 
     echo ""
-    log_success "Flow Think MCP installed"
-    log_info "Runtime: $runtime"
-    log_info "Path: $mcp_dst/dist/index.js"
+    log_success "Flow Think MCP installed (standalone executable)"
+    log_info "Path: $mcp_dst/flow-think-mcp"
 }
 
 configure_mcp_for_claude() {
     local claude_json="$HOME/.claude.json"
-    local mcp_config="$TEMPLATES_DIR/claude/mcp-config.json"
-
-    if [[ ! -f "$mcp_config" ]]; then
-        log_warn "Claude MCP config template not found"
-        return
-    fi
+    local mcp_exe="$FLOW_DATA_DIR/mcp/flow-think/flow-think-mcp"
 
     log_info "Configuring MCP for Claude Code..."
 
-    # Determine runtime
-    local runtime="node"
-    if command -v bun &>/dev/null; then
-        runtime="bun"
+    # Check if standalone executable exists
+    if [[ ! -f "$mcp_exe" ]]; then
+        log_warn "Flow Think MCP executable not found at $mcp_exe"
+        log_info "Run install_mcp first"
+        return
     fi
+
+    local mcp_config='{
+  "flow-think": {
+    "command": "'"$mcp_exe"'",
+    "args": [],
+    "env": {
+      "FLOW_MCP_BEADS_SYNC": "true",
+      "FLOW_MCP_OUTPUT_FORMAT": "console"
+    }
+  }
+}'
 
     if [[ -f "$claude_json" ]]; then
         backup_file "$claude_json"
 
         if command -v jq &>/dev/null; then
-            # Extract mcpServers from our config
-            local our_mcp
-            our_mcp=$(jq '.mcpServers' "$mcp_config")
-
-            # Update command based on runtime
-            if [[ "$runtime" == "node" ]]; then
-                our_mcp=$(echo "$our_mcp" | jq '.["flow-think"].command = "node"')
-            fi
-
-            # Merge with existing
             local temp_file
             temp_file=$(mktemp)
-            jq --argjson mcp "$our_mcp" '.mcpServers = (.mcpServers // {}) + $mcp' "$claude_json" > "$temp_file" && mv "$temp_file" "$claude_json"
+            jq --argjson mcp "$mcp_config" '.mcpServers = (.mcpServers // {}) + $mcp' "$claude_json" > "$temp_file" && mv "$temp_file" "$claude_json"
             log_success "Merged: MCP configuration into ~/.claude.json"
         else
             log_warn "jq not installed - manual MCP config required"
-            echo "         Add to ~/.claude.json:"
-            echo '         "mcpServers": { "flow-think": { "command": "'$runtime'", "args": ["run", "~/.flow/mcp/flow-think/dist/index.js"] } }'
+            echo "         Add to ~/.claude.json mcpServers:"
+            echo "         \"flow-think\": { \"command\": \"$mcp_exe\", \"args\": [] }"
         fi
     else
         # Create new claude.json
         if command -v jq &>/dev/null; then
-            local mcp_json
-            if [[ "$runtime" == "bun" ]]; then
-                mcp_json=$(jq '{mcpServers: .mcpServers}' "$mcp_config")
-            else
-                mcp_json=$(jq '.mcpServers["flow-think"].command = "node" | {mcpServers: .mcpServers}' "$mcp_config")
-            fi
-            echo "$mcp_json" > "$claude_json"
+            echo "{\"mcpServers\": $mcp_config}" | jq '.' > "$claude_json"
             log_success "Created: ~/.claude.json with MCP configuration"
         else
             cat > "$claude_json" << EOF
 {
   "mcpServers": {
     "flow-think": {
-      "command": "$runtime",
-      "args": ["run", "~/.flow/mcp/flow-think/dist/index.js"],
+      "command": "$mcp_exe",
+      "args": [],
       "env": {
         "FLOW_MCP_BEADS_SYNC": "true"
       }
