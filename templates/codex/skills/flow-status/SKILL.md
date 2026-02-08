@@ -1,5 +1,6 @@
 ---
 name: flow-status
+description: "Display progress overview for all active flows"
 ---
 
 # Flow Status

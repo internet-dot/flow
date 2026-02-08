@@ -1,6 +1,7 @@
 ---
 name: flow-prd
-description: "Orchestrate complex roadmaps, analyze complexity, and generate Sagas (Meta-Flows)"
+description: "Create PRD (Saga) with unified spec for complex roadmaps"
+---
 ---
 
 ## 1.0 SYSTEM DIRECTIVE

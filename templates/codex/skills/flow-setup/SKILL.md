@@ -1,5 +1,6 @@
 ---
 name: flow-setup
+description: "Initialize project with Flow framework and Beads integration"
 ---
 
 # Flow Setup

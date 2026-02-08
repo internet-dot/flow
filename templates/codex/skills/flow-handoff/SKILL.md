@@ -1,5 +1,6 @@
 ---
 name: flow-handoff
+description: "Create context handoff for session transfer"
 ---
 
 # Flow Handoff

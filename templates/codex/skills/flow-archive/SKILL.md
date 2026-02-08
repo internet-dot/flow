@@ -1,5 +1,6 @@
 ---
 name: flow-archive
+description: "Archive completed flow and elevate patterns"
 ---
 
 # Flow Archive

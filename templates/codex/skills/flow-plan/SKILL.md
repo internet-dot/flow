@@ -1,6 +1,7 @@
 ---
 name: flow-plan
-description: Plans a single Flow with research integration and strict context observance
+description: "Plan single flow with unified spec.md"
+---
 ---
 
 ## 1.0 SYSTEM DIRECTIVE

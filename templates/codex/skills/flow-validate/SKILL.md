@@ -1,5 +1,6 @@
 ---
 name: flow-validate
+description: "Validate project integrity and fix issues"
 ---
 
 # Flow Validate

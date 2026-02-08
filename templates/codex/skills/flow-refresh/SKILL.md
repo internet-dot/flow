@@ -1,5 +1,6 @@
 ---
 name: flow-refresh
+description: "Sync context docs with current codebase state"
 ---
 
 # Flow Refresh

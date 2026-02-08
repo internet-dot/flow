@@ -1,5 +1,6 @@
 ---
 name: flow-export
+description: "Generate project summary export"
 ---
 
 # Flow Export

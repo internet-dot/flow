@@ -1,5 +1,6 @@
 ---
 name: flow-research
+description: "Conduct pre-PRD research"
 ---
 
 # Flow Research

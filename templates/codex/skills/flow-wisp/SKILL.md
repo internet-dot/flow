@@ -1,5 +1,6 @@
 ---
 name: flow-wisp
+description: "Create ephemeral exploration flow"
 ---
 
 # Flow Wisp

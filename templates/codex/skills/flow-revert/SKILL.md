@@ -1,5 +1,6 @@
 ---
 name: flow-revert
+description: "Git-aware revert of flows, phases, or tasks"
 ---
 
 # Flow Revert

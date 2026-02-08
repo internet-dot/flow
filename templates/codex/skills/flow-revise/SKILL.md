@@ -1,5 +1,6 @@
 ---
 name: flow-revise
+description: "Update spec/plan when implementation reveals issues"
 ---
 
 # Flow Revise

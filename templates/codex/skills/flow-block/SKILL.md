@@ -1,5 +1,6 @@
 ---
 name: flow-block
+description: "Mark task as blocked with reason"
 ---
 
 # Flow Block

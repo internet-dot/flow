@@ -1,5 +1,6 @@
 ---
 name: flow-formula
+description: "List and manage flow templates"
 ---
 
 # Flow Formula

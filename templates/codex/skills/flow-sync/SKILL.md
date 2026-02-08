@@ -1,6 +1,6 @@
 ---
 name: flow-sync
-description: "Export Beads state back to .agent/specs/ markdown"
+description: "Export Beads state to spec.md"
 ---
 
 # Flow Sync

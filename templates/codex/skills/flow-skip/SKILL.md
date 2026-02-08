@@ -1,5 +1,6 @@
 ---
 name: flow-skip
+description: "Skip task with justification"
 ---
 
 # Flow Skip

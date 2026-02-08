@@ -1,5 +1,6 @@
 ---
 name: flow-distill
+description: "Extract reusable template from completed flow"
 ---
 
 # Flow Distill
