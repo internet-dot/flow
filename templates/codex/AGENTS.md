@@ -13,26 +13,27 @@ A flow is a logical unit of work (feature, bug fix, refactor). Each flow has:
 ### Beads Integration (Source of Truth)
 Beads provides persistent cross-session memory:
 ```bash
-bd init --stealth          # Initialize (stealth mode)
-bd ready                   # Show tasks ready to work on
-bd update <id> --status in_progress  # Start task
-bd close <id> --reason "..." # Complete task
-bd prime                   # Load context for session
-bd show <id> --children --json  # Export epic with tasks
-bd compact                 # Compact database
+br init                    # Initialize Beads
+br status                  # Workspace overview
+br ready                   # Show tasks ready to work on
+br list --status in_progress  # Resume active work
+br update <id> --status in_progress  # Start task
+br close <id> --reason "..." # Complete task
+br show <id> --format json  # Export epic with tasks
 ```
 
 ### Task Workflow (TDD) - Beads-First
-1. **Select task** from `bd ready` (Beads is source of truth)
-2. **Mark in progress** → `bd update <id> --status in_progress`
+1. **Select task** from `br ready` (Beads is source of truth)
+2. **Mark in progress** → `br update <id> --status in_progress`
 3. **Write failing tests** (Red)
 4. **Implement to pass** (Green)
 5. **Refactor** while green
 6. Commit with conventional format
-7. **Sync to Beads** → `bd close <id> --reason "commit: <sha>"`
-8. Log learnings in learnings.md
+7. **Sync to Beads** → `br close <id> --reason "commit: <sha>"`
+8. **Sync to markdown** → run `/flow:sync` (MANDATORY)
+9. Log learnings in learnings.md
 
-**CRITICAL:** Never write `[x]` or `[~]` markers to spec.md. Beads is the source of truth.
+**CRITICAL:** After ANY Beads state change (close, block, skip, revert, revise), agents MUST run `/flow:sync` to update spec.md. Never write `[x]`, `[~]`, `[!]`, or `[-]` markers directly to spec.md.
 
 ### Directory Structure
 ```

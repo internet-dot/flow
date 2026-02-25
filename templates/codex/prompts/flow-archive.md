@@ -19,7 +19,7 @@ This ensures spec.md reflects the final state from Beads (source of truth).
 Check Beads for completion status:
 
 ```bash
-bd show {epic_id}
+br show {epic_id}
 ```
 
 Or read `.agent/specs/{flow_id}/spec.md` Implementation Plan section to verify all tasks are `[x]` completed or `[-]` skipped.
@@ -53,14 +53,28 @@ Append selected patterns to `.agent/patterns.md`:
 - Must update barrel exports after adding files (from: {flow_id})
 ```
 
-## Phase 3: Close Beads Epic
+## Phase 3: Knowledge Extraction
+
+1. Create `.agent/knowledge/` if missing.
+2. Read `learnings.md`, `spec.md` header, and `metadata.json` from the flow.
+3. Generate `.agent/knowledge/{flow_id}.md` with:
+   - Flow ID, description, completion date, archive date
+   - Topic tags (2-5 tags inferred from learnings content)
+   - Which patterns were elevated to patterns.md
+   - **Full verbatim content** from learnings.md
+   - Key files mentioned in learnings
+   - 2-3 sentence summary
+4. Update `.agent/knowledge/index.md`:
+   - Append row to Entries table: `| {flow_id} | {date} | {topics} | {summary} |`
+   - Add entries under Topic Index headings (create headings if new)
+
+## Phase 4: Close Beads Epic
 
 ```bash
-bd close {epic_id} --reason "Flow archived"
-bd compact  # Optional: compact Beads after archiving
+br close {epic_id} --reason "Flow archived"
 ```
 
-## Phase 4: Move to Archive
+## Phase 5: Move to Archive
 
 1. Move directory:
    ```
@@ -71,7 +85,7 @@ bd compact  # Optional: compact Beads after archiving
    - Remove from Active section
    - Add to Archived section with completion date
 
-## Phase 5: Create Archive Summary
+## Phase 6: Create Archive Summary
 
 Create `.agent/archive/{flow_id}/summary.md`:
 ```markdown
@@ -102,7 +116,6 @@ Flow Archived: {flow_id}
 Location: .agent/archive/{flow_id}/
 Patterns Elevated: {count}
 Epic Closed: {epic_id}
-Beads Compacted: Yes/No
 
 Project patterns updated. View with:
 cat .agent/patterns.md

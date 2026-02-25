@@ -2,7 +2,7 @@
 
 **Measure twice, code once.**
 
-Flow is a unified toolkit for **Context-Driven Development** that works with **Claude Code**, **Gemini CLI**, **Codex CLI**, and **OpenCode**. It combines spec-first planning with **Beads** for persistent cross-session memory, enabling AI-assisted development with deep, persistent project awareness.
+Flow is a unified toolkit for **Context-Driven Development** that works with **Claude Code**, **Gemini CLI**, **Codex CLI**, **OpenCode**, and **Google Antigravity**. It combines spec-first planning with **Beads** for persistent cross-session memory, enabling AI-assisted development with deep, persistent project awareness.
 
 ## Philosophy
 
@@ -13,11 +13,11 @@ Control your code. By treating context as a managed artifact alongside your code
 ## Key Features
 
 - **Beads Integration**: Persistent task memory that survives context compaction
-- **Multi-CLI Support**: Works with Claude Code, Gemini CLI, Codex CLI, and OpenCode
+- **Multi-CLI Support**: Works with Claude Code, Gemini CLI, Codex CLI, OpenCode, and Google Antigravity
 - **Spec-First Development**: Create specs and plans before writing code
 - **TDD Workflow**: Red-Green-Refactor with >80% coverage requirements
-- **Knowledge Flywheel**: Capture and elevate patterns across tracks (Ralph-style)
-- **Track Management**: Block, skip, revise, archive with full audit trail
+- **Knowledge Flywheel**: Capture and elevate patterns across flows (Ralph-style)
+- **Flow Management**: Block, skip, revise, archive with full audit trail
 - **Git-Aware Revert**: Understands logical units of work, not just commits
 - **Parallel Execution**: Phase-level task parallelism via sub-agents
 
@@ -43,6 +43,7 @@ The installer supports:
 - **Claude Code** (`~/.claude/`)
 - **Codex CLI** (`~/.codex/`)
 - **OpenCode** (`~/.config/opencode/`)
+- **Google Antigravity** (`~/.gemini/antigravity/skills/`)
 
 **Note:** Gemini CLI now uses native extension installation: `gemini extensions install flow`
 
@@ -51,7 +52,7 @@ The installer supports:
 ##### Beads (Required)
 
 ```bash
-npm install -g beads-cli
+curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/beads_rust/main/install.sh | bash
 ```
 
 ##### Claude Code
@@ -85,6 +86,13 @@ cp -r templates/opencode/agents/* ~/.config/opencode/agents/
 gemini extensions install flow
 ```
 
+##### Google Antigravity
+
+```bash
+# Copy Flow workflow skills to Antigravity skills directory
+cp -r templates/antigravity/skills/* ~/.gemini/antigravity/skills/
+```
+
 ### Initialize a Project
 
 ```bash
@@ -101,9 +109,9 @@ Flow will:
 2. Initialize Beads in stealth mode
 3. Create project context files
 4. Guide you through product, tech stack, and workflow setup
-5. Create your first track
+5. Create your first flow
 
-### Create a PRD (Track)
+### Create a Flow
 
 ```bash
 # Claude Code
@@ -119,7 +127,7 @@ This creates:
 - `learnings.md` - Pattern capture log
 - Beads epic with tasks for cross-session persistence
 
-**Note:** Flow uses a unified spec.md (no separate plan.md). Beads is the source of truth for task status. Use `/flow:sync` to export Beads state to spec.md when needed.
+**Note:** Flow uses a unified spec.md (no separate plan.md). Beads is the source of truth for task status. Use `/flow:sync` to export Beads state to spec.md (MANDATORY after every state change).
 
 ### Implement
 
@@ -133,17 +141,18 @@ This creates:
 
 Flow follows TDD workflow (Beads-first):
 
-1. Select task from `bd ready` (Beads is source of truth)
-2. Mark in progress: `bd update <id> --status in_progress`
+1. Select task from `br ready` (Beads is source of truth)
+2. Mark in progress: `br update <id> --status in_progress`
 3. Write failing tests
 4. Implement to pass
 5. Refactor
 6. Verify coverage
 7. Commit with conventional format
-8. Sync to Beads: `bd close <id> --reason "commit: <sha>"`
+8. Sync to Beads: `br close <id> --reason "commit: <sha>"`
 9. Capture learnings
+10. Sync to markdown: run `/flow-sync` (MANDATORY)
 
-**Note:** Never write `[x]` or `[~]` markers to spec.md. Beads is the source of truth.
+**CRITICAL:** Never write `[x]`, `[~]`, `[!]`, or `[-]` markers directly to spec.md. Beads is the source of truth. After ANY Beads state change, agents MUST run `/flow-sync` to update spec.md.
 
 ## Commands
 
@@ -162,12 +171,12 @@ Flow follows TDD workflow (Beads-first):
 | Block task | `/flow-block` | `/flow:block` |
 | Skip task | `/flow-skip` | `/flow:skip` |
 | Revise spec/plan | `/flow-revise` | `/flow:revise` |
-| Archive track | `/flow-archive` | `/flow:archive` |
+| Archive flow | `/flow-archive` | `/flow:archive` |
 | Export summary | `/flow-export` | `/flow:export` |
 | Session handoff | `/flow-handoff` | `/flow:handoff` |
 | Sync context | `/flow-refresh` | `/flow:refresh` |
 | Manage templates | `/flow-formula` | `/flow:formula` |
-| Ephemeral track | `/flow-wisp` | `/flow:wisp` |
+| Ephemeral flow | `/flow-wisp` | `/flow:wisp` |
 | Extract template | `/flow-distill` | `/flow:distill` |
 
 > **Note**: Codex CLI and OpenCode use the same `/flow:command` syntax as Gemini CLI.
@@ -181,24 +190,26 @@ project/
 │   ├── product-guidelines.md # Brand/style guidelines
 │   ├── tech-stack.md        # Technology choices
 │   ├── workflow.md          # Development workflow (TDD, commits)
-│   ├── tracks.md            # Track registry with status
+│   ├── flows.md             # Flow registry with status
 │   ├── patterns.md          # Consolidated learnings
 │   ├── beads.json           # Beads configuration
 │   ├── index.md             # File resolution index
 │   ├── code-styleguides/    # Language style guides
+│   ├── knowledge/           # Persistent knowledge base
+│   │   ├── index.md          # Quick reference index
+│   │   └── {flow_id}.md      # Per-flow detailed learnings
 │   ├── specs/
-│   │   └── <track_id>/      # e.g., user-auth_20260124/
-│   │       ├── spec.md
-│   │       ├── plan.md
+│   │   └── <flow_id>/       # e.g., user-auth_20260124/
+│   │       ├── spec.md       # Unified spec + plan
 │   │       ├── learnings.md
 │   │       └── metadata.json
-│   └── archive/             # Completed tracks
+│   └── archive/             # Completed flows
 └── .beads/                  # Beads data (stealth mode)
 ```
 
-## Track Naming
+## Flow Naming
 
-Tracks use format: `shortname_YYYYMMDD`
+Flows use format: `shortname_YYYYMMDD`
 
 Examples:
 
@@ -222,31 +233,34 @@ Beads provides persistent memory across sessions:
 
 ```bash
 # At session start
-bd sync
-bd prime
+br status                          # Workspace overview
+br ready                           # List unblocked tasks
+br list --status in_progress       # Resume active work
 
 # During work
-bd ready              # Show unblocked tasks
-bd update <id> --status in_progress
-bd close <id> --reason "commit: abc123"
+br ready              # Show unblocked tasks
+br update <id> --status in_progress
+br close <id> --reason "commit: abc123"
 
 # At session end
-bd sync
+br sync --flush-only
+git add .beads/
+git commit -m "sync beads"
 # Notes survive context compaction!
 ```
 
 ### Session Protocol
 
-1. **Start**: `bd sync && bd prime` loads context
+1. **Start**: `br status` + `br ready` to load context and find unblocked tasks
 2. **Work**: Update task status as you progress
 3. **Learn**: Add notes for important discoveries
-4. **End**: `bd sync` persists everything
+4. **End**: `br sync --flush-only && git add .beads/ && git commit -m "sync beads"` persists everything
 
-## Knowledge System (Ralph-style)
+## Knowledge System (Three-Tier)
 
-### Per-Track Learnings
+### Per-Flow Learnings
 
-Each track has `learnings.md`:
+Each flow has `learnings.md`:
 
 ```markdown
 ## [2026-01-24 14:30] - Phase 1 Task 2: Add auth middleware
@@ -268,13 +282,16 @@ Consolidated in `patterns.md`:
 - Always update barrel exports
 ```
 
+### Persistent Knowledge Base
+
+Full learnings persisted in `knowledge/{flow_id}.md` during archival. Survives archive cleanup — detailed learnings are never lost. The `knowledge/index.md` provides a lightweight topic-based lookup.
+
 ### Knowledge Flywheel
 
-1. Implement → discover patterns
-2. Log in `learnings.md`
-3. Phase completion → prompt for elevation
-4. Archive → extract to `patterns.md`
-5. New flows → inherit patterns
+1. **Capture** - After each task, append learnings to `learnings.md`
+2. **Elevate** - At phase/flow completion, move patterns to `patterns.md`
+3. **Extract** - At archive, persist full learnings to `knowledge/{flow_id}.md`
+4. **Inherit** - New flows read `patterns.md` + scan `knowledge/index.md`
 
 ## Skills Library
 

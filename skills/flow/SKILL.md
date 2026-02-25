@@ -9,7 +9,7 @@ description: "Context-driven development workflow with Beads integration. Auto-a
 
 This skill activates when:
 - `.agent/` directory exists in the project root
-- User mentions "flow", "flow", "spec", "plan", or "implement"
+- User mentions "flow", "spec", "plan", or "implement"
 - User invokes `/flow-*` commands
 
 ## Core Concepts
@@ -32,14 +32,14 @@ Flow requires Beads for persistent cross-session memory:
 - Each flow becomes a Beads epic
 - Tasks sync bidirectionally
 - Notes survive context compaction
-- Run `bd prime` at session start
+- Run `br status` + `br ready` at session start
 
 ## Universal File Resolution Protocol
 
 **To locate files within Flow context:**
 
 1. **Project Index**: `.agent/index.md`
-2. **Specs Registry**: `.agent/prds.md` (or flows.md)
+2. **Flow Registry**: `.agent/flows.md`
 3. **Flow Index**: `.agent/specs/{flow_id}/index.md`
 
 **Default Paths:**
@@ -47,6 +47,8 @@ Flow requires Beads for persistent cross-session memory:
 - Tech Stack: `.agent/tech-stack.md`
 - Workflow: `.agent/workflow.md`
 - Patterns: `.agent/patterns.md`
+- Knowledge Index: `.agent/knowledge/index.md`
+- Knowledge Entries: `.agent/knowledge/{flow_id}.md`
 - Beads Config: `.agent/beads.json`
 
 ## Workflow Commands
@@ -66,33 +68,35 @@ Flow requires Beads for persistent cross-session memory:
 | `/flow-revise` | `/flow:revise` | Update spec/plan mid-work |
 | `/flow-archive` | `/flow:archive` | Archive completed flow |
 | `/flow-export` | `/flow:export` | Generate summary export |
-| `/flow-handoff` | `/flow:handoff` | Context handoff for sections |
+| `/flow-handoff` | `/flow:handoff` | Context handoff for sessions |
 | `/flow-refresh` | `/flow:refresh` | Sync context with codebase |
-| `/flow-formula` | `/flow:formula` | Manage Beads templates |
+| `/flow-formula` | `/flow:formula` | Manage flow templates |
 | `/flow-wisp` | `/flow:wisp` | Ephemeral exploration flow |
 | `/flow-distill` | `/flow:distill` | Extract reusable template |
+| `/flow-docs` | `/flow:docs` | Documentation workflow |
 
 ## Task Workflow (TDD) - Beads-First
 
-1. **Select task** from `bd ready` (Beads is source of truth)
-2. **Mark in progress**: `bd update {id} --status in_progress`
+1. **Select task** from `br ready` (Beads is source of truth)
+2. **Mark in progress**: `br update {id} --status in_progress`
 3. **Write failing tests** (Red phase) - CRITICAL: confirm failure first
 4. **Implement** to pass (Green phase)
 5. **Refactor** with test safety
 6. **Verify coverage** (>80% target)
 7. **Commit** with format: `<type>(<scope>): <description>`
 8. **Attach git notes** with task summary
-9. **Sync to Beads**: `bd close {id} --reason "commit: {sha}"`
+9. **Sync to Beads**: `br close {id} --reason "commit: {sha}"`
+10. **Sync to markdown**: run `/flow-sync` (MANDATORY — keeps spec.md readable)
 
-**CRITICAL:** Never write `[x]` or `[~]` markers to spec.md. Beads is the source of truth.
+**CRITICAL:** Never write `[x]`, `[~]`, `[!]`, or `[-]` markers to spec.md. Beads is the source of truth. After ANY Beads state change, agents MUST run `/flow-sync` to update spec.md.
 
-## Knowledge Flywheel
+## Knowledge Flywheel (Three-Tier)
 
-1. **Implement** - Discover patterns while coding
-2. **Log** - Record in flow's `learnings.md`
-3. **Sync** - Auto-sync to Beads notes
-4. **Elevate** - At phase/flow completion, elevate to `patterns.md`
-5. **Prime** - New flows inherit from `patterns.md`
+1. **Capture** - After each task, append learnings to flow's `learnings.md`
+2. **Sync** - Auto-sync to Beads notes
+3. **Elevate** - At phase/flow completion, move reusable patterns to `patterns.md`
+4. **Extract** - At archive, persist full learnings to `knowledge/{flow_id}.md`
+5. **Inherit** - New flows read `patterns.md` + scan `knowledge/index.md`
 
 ## Phase Completion Protocol
 
@@ -103,16 +107,19 @@ When a phase completes:
 4. Await user confirmation
 5. Create checkpoint commit
 6. Attach verification report as git note
-7. Record checkpoint in Beads: `bd update {epic_id} --append-notes "Phase {N} checkpoint: {sha}"
+7. Record checkpoint in Beads: `br comments add {epic_id} "Phase {N} checkpoint: {sha}"`
+8. Sync to markdown: run `/flow-sync` (MANDATORY)
 
 ## Proactive Behaviors
 
 When Flow skill is active:
 - Check for resume state at session start
-- Offer to run `bd prime` for context
+- Run `br status` and `br ready` for context
+- Scan `knowledge/index.md` for relevant past learnings when starting a new flow
 - Prompt for learnings capture after tasks
 - Suggest pattern elevation at phase completion
 - Warn if tech-stack changes without documentation
+- Enforce mandatory `/flow-sync` after any Beads state change
 
 ## References
 

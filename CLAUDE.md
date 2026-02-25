@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Flow Framework**: Spec-first planning, human-readable context, TDD workflow
 - **Beads Integration**: Dependency-aware task graph, cross-session memory, agent-optimized output
 
-It works with both **Claude Code** (primary) and **Gemini CLI** (primary) with support for **OpenAI Codex** and **OpenCode** (secondary).
+It works with **Claude Code** (primary), **Gemini CLI** (primary), and **Google Antigravity** (primary) with support for **OpenAI Codex** and **OpenCode** (secondary).
 
 ## Architecture
 
@@ -19,7 +19,7 @@ It works with both **Claude Code** (primary) and **Gemini CLI** (primary) with s
 flow/
 ├── templates/
 │   ├── claude/
-│   │   └── commands/       # Claude Code commands (18 commands)
+│   │   └── commands/       # Claude Code commands (20 commands)
 │   ├── codex/
 │   │   ├── skills/         # Codex Agent Skills (flow-*/SKILL.md)
 │   │   └── AGENTS.md       # Codex global instructions
@@ -27,6 +27,8 @@ flow/
 │   │   ├── commands/       # OpenCode commands
 │   │   ├── agents/         # OpenCode agents
 │   │   └── opencode.json   # OpenCode config
+│   ├── antigravity/
+│   │   └── skills/         # Antigravity Workflow Skills (flow-*/SKILL.md)
 │   ├── skills/             # Consolidated skills library (50+ skills)
 │   │   ├── flow/           # Flow workflow skill
 │   │   ├── beads/          # Beads integration skill
@@ -38,7 +40,7 @@ flow/
 │   └── agent/              # Templates for user .agent/ directory
 │       ├── beads.json      # Beads config template
 │       ├── patterns.md     # Project patterns template
-│       ├── learnings.md    # Per-track learnings template
+│       ├── learnings.md    # Per-flow learnings template
 │       └── workflow.md     # Workflow template
 ├── commands/flow/          # Gemini commands
 ├── scripts/
@@ -53,26 +55,26 @@ flow/
 
 | Gemini CLI | Claude Code | Purpose |
 |------------|-------------|---------|
-| `/flow:setup` | `/flow-setup` | Initialize project with context files, Beads, and first track |
-| `/flow:prd` | `/flow-prd` | Create PRD (track) with unified spec |
+| `/flow:setup` | `/flow-setup` | Initialize project with context files, Beads, and first flow |
+| `/flow:prd` | `/flow-prd` | Create PRD (flow) with unified spec |
 | `/flow:plan` | `/flow-plan` | Plan single flow with unified spec.md |
 | `/flow:sync` | `/flow-sync` | Export Beads state to spec.md |
 | `/flow:research` | `/flow-research` | Conduct pre-PRD research |
 | `/flow:docs` | `/flow-docs` | Five-phase documentation workflow |
-| `/flow:implement` | `/flow-implement` | Execute tasks from track's plan (TDD workflow) |
+| `/flow:implement` | `/flow-implement` | Execute tasks from flow's spec (TDD workflow) |
 | `/flow:status` | `/flow-status` | Display progress overview with Beads status |
-| `/flow:revert` | `/flow-revert` | Git-aware revert of tracks, phases, or tasks |
+| `/flow:revert` | `/flow-revert` | Git-aware revert of flows, phases, or tasks |
 | `/flow:validate` | `/flow-validate` | Validate project integrity and fix issues |
 | `/flow:block` | `/flow-block` | Mark task as blocked with reason |
 | `/flow:skip` | `/flow-skip` | Skip current task with justification |
 | `/flow:revise` | `/flow-revise` | Update spec/plan when implementation reveals issues |
-| `/flow:archive` | `/flow-archive` | Archive completed tracks + elevate patterns |
+| `/flow:archive` | `/flow-archive` | Archive completed flows + elevate patterns |
 | `/flow:export` | `/flow-export` | Generate project summary export |
 | `/flow:handoff` | `/flow-handoff` | Create context handoff for session transfer |
 | `/flow:refresh` | `/flow-refresh` | Sync context docs with current codebase state |
-| `/flow:formula` | `/flow-formula` | List and manage track templates (Beads formulas) |
-| `/flow:wisp` | `/flow-wisp` | Create ephemeral exploration track (no audit trail) |
-| `/flow:distill` | `/flow-distill` | Extract reusable template from completed track |
+| `/flow:formula` | `/flow-formula` | List and manage flow templates |
+| `/flow:wisp` | `/flow-wisp` | Create ephemeral exploration flow (no audit trail) |
+| `/flow:distill` | `/flow-distill` | Extract reusable template from completed flow |
 
 ### Skills
 
@@ -93,7 +95,7 @@ project/
 │   ├── product-guidelines.md # Brand/style guidelines
 │   ├── tech-stack.md        # Technology choices
 │   ├── workflow.md          # Development workflow (TDD, commits)
-│   ├── tracks.md            # Master track list with status
+│   ├── flows.md             # Master flow list with status
 │   ├── patterns.md          # Consolidated learnings (Ralph-style)
 │   ├── beads.json           # Beads integration config
 │   ├── index.md             # File resolution index
@@ -101,79 +103,93 @@ project/
 │   ├── refresh_state.json   # Context refresh tracking
 │   ├── code-styleguides/    # Language-specific style guides
 │   ├── research/            # Research documents
-│   ├── wisps/               # Ephemeral exploration tracks
+│   ├── wisps/               # Ephemeral exploration flows
 │   ├── templates/           # Project-specific templates
-│   ├── archive/             # Archived tracks
+│   ├── knowledge/              # Persistent knowledge base
+│   │   ├── index.md            # Quick reference index
+│   │   └── {flow_id}.md        # Per-flow detailed learnings
+│   ├── archive/             # Archived flows
 │   └── specs/
-│       └── <track_id>/
-│           ├── metadata.json     # Track config + Beads epic ID
+│       └── <flow_id>/
+│           ├── metadata.json     # Flow config + Beads epic ID
 │           ├── spec.md           # Unified spec + plan (requirements AND tasks)
 │           ├── learnings.md      # Patterns/gotchas discovered
 │           ├── implement_state.json # Resume state (if in progress)
 │           ├── blockers.md       # Block history log
 │           ├── skipped.md        # Skipped tasks log
 │           └── revisions.md      # Revision history log
-└── .beads/                  # Beads data (created by bd init --stealth)
+└── .beads/                  # Beads data (created by br init)
 ```
 
 ## Key Concepts
 
-### Tracks
+### Flows
 
-A track is a logical unit of work (feature, bug fix, refactor). Each track has:
+A flow is a logical unit of work (feature, bug fix, refactor). Each flow has:
 
 - **Unique ID format:** `shortname_YYYYMMDD` (e.g., `user-auth_20260124`)
 - **Status markers:** `[ ]` pending, `[~]` in progress, `[x]` completed, `[!]` blocked, `[-]` skipped
-- **Own directory** with spec, plan, metadata, learnings, and state files
+- **Own directory** with spec, metadata, learnings, and state files
 
 ### Task Workflow (TDD)
 
-1. Select task from plan.md (or use `bd ready` for Beads-aware selection)
-2. Mark `[~]` in progress → sync to Beads: `bd update <id> --status in_progress`
+1. Select task via `br ready` (Beads is source of truth; fall back to spec.md)
+2. Mark in Beads: `br update <id> --status in_progress`
 3. **Write failing tests** (Red)
 4. **Implement to pass** (Green)
 5. **Refactor** while green
 6. Verify >80% coverage
 7. Commit: `<type>(<scope>): <description>`
-8. Update plan.md with commit SHA: `[x]`
-9. Sync to Beads: `bd close <id> --reason "commit: <sha>"`
-10. **Log learnings** in learnings.md
+8. Sync to Beads: `br close <id> --reason "commit: <sha>"`
+9. **Log learnings** in learnings.md
+10. **Sync to markdown:** run `/flow-sync` (MANDATORY — keeps spec.md readable)
+
+**CRITICAL:** After ANY Beads state change (close, block, skip, revert, revise), agents MUST run `/flow-sync` to update spec.md. Never write markers (`[x]`, `[~]`, `[!]`, `[-]`) directly to spec.md.
 
 **Important:** All commits stay local. Flow never pushes automatically.
 
 ### Beads Integration (Required)
 
+**Note:** `br` is non-invasive and never executes git commands. After `br sync --flush-only`, you must manually run `git add .beads/ && git commit`.
+
 Beads provides persistent cross-session memory:
 
-- **Stealth mode by default** (local-only, not committed)
-- Each track becomes a Beads epic
-- Tasks sync for dependency tracking: `bd ready` finds unblocked tasks
+- **Local-only by default** (`.beads/` added to `.gitignore`)
+- Each flow becomes a Beads epic
+- Tasks sync for dependency tracking: `br ready` finds unblocked tasks
 - **Notes survive context compaction** - critical for multi-session work
-- Graceful degradation if `bd` unavailable
+- Graceful degradation if `br` unavailable
 
 **Key Beads Commands:**
 
 ```bash
-bd init --stealth                     # Initialize Beads (stealth mode)
-bd create "Track: name" -t epic -p 1 \
-  --description="Track purpose and goals" \
-  --notes="Created by /flow-prd on YYYY-MM-DD"
-bd create "Task" --parent <epic> -p 2 \
-  --description="What needs to be done and why" \
-  --notes="Phase N, Task M. Files: affected_files"
-bd ready                              # Show tasks ready to work on
-bd update <id> --status in_progress   # Start task
-bd close <id> --reason "commit: sha"  # Complete task with commit reference
-bd blocked                            # Show blocked tasks
-bd sync                               # Sync with git
-bd prime                              # Load context for session
+br init                               # Initialize Beads
+br create "Flow: name" -t epic -p 1 \
+  --description="Flow purpose and goals"
+# Then add context notes (br create does NOT support --notes):
+br update <id> --notes "Created by /flow-prd on YYYY-MM-DD"
+
+br create "Task" --parent <epic> -p 2 \
+  --description="What needs to be done and why"
+br update <id> --notes "Phase N, Task M. Files: affected_files"
+
+br status                             # Workspace overview
+br ready                              # Show tasks ready to work on
+br update <id> --status in_progress   # Start task
+br close <id> --reason "commit: sha"  # Complete task with commit reference
+br blocked                            # Show blocked tasks
+br sync --flush-only                  # Sync with git
+git add .beads/
+git commit -m "sync beads"
 ```
 
-**CRITICAL: Always include `--description` and `--notes` with `bd create`:**
+**CRITICAL: `br create` supports `--description` but NOT `--notes`:**
 
-- `--description`: WHY this issue exists and WHAT needs to be done
-- `--notes`: CONTEXT - files affected, dependencies, origin command, timestamp
+- `--description`: WHY this issue exists and WHAT needs to be done (at creation)
+- `--notes`: CONTEXT via `br update` — files affected, dependencies, origin command, timestamp
 - Priority levels: P0=critical, P1=high, P2=medium, P3=low, P4=backlog
+
+**beads-rust valid statuses:** `open`, `in_progress`, `blocked`, `deferred`, `closed`, `tombstone`, `pinned`
 
 ### When to Track in Beads
 
@@ -188,12 +204,18 @@ bd prime                              # Load context for session
 **Why this matters:**
 
 - Notes survive context compaction - critical for multi-session work
-- `bd ready` finds unblocked work automatically
+- `br ready` finds unblocked work automatically
 - If resuming in 2 weeks would be hard without context, use Beads
 
-### Learnings System (Ralph-style Knowledge Flywheel)
+### Learnings System (Three-Tier Knowledge)
 
-**Per-Track (`learnings.md`):**
+| Tier | File | Loaded | Purpose |
+|------|------|--------|---------|
+| **Patterns** | `.agent/patterns.md` | Always | Elevated actionable rules for priming |
+| **Knowledge Index** | `.agent/knowledge/index.md` | Always | Lightweight scan of all flow learnings |
+| **Knowledge Entries** | `.agent/knowledge/{flow_id}.md` | On demand | Full detailed learnings per flow |
+
+**Per-Flow (`learnings.md`):**
 
 - Append-only log of discoveries during implementation
 - Format: `[timestamp] - Phase/Task - Learning`
@@ -201,17 +223,22 @@ bd prime                              # Load context for session
 
 **Project-Level (`patterns.md`):**
 
-- Consolidated patterns elevated from completed tracks
+- Consolidated patterns elevated from completed flows
 - Categories: Code Conventions, Architecture, Gotchas, Testing, Context
 - **Read before starting work** to prime context
 
+**Persistent Knowledge Base (`knowledge/`):**
+
+- Full verbatim learnings persisted independently of archives
+- Survives archive cleanup — detailed learnings never lost
+- Index provides lightweight topic-based lookup
+
 **Knowledge Flywheel:**
 
-1. Implement → discover patterns
-2. Log in track `learnings.md` (auto-sync to Beads notes)
-3. At phase/track completion → prompt for pattern elevation
-4. Archive track → extract remaining patterns to `patterns.md`
-5. New flows → inherit patterns from `patterns.md`
+1. **Capture** - After each task, append learnings to flow's `learnings.md`
+2. **Elevate** - At phase/flow completion, move reusable patterns to `.agent/patterns.md`
+3. **Extract** - At archive, persist full learnings to `knowledge/{flow_id}.md`
+4. **Inherit** - New flows read `patterns.md` + scan `knowledge/index.md`
 
 ### Parallel Execution
 
@@ -228,7 +255,7 @@ At phase completion:
 
 - Run full test suite
 - Verify coverage requirements
-- Create git tag: `checkpoint/{track_id}/phase-{N}`
+- Create git tag: `checkpoint/{flow_id}/phase-{N}`
 - Prompt for pattern elevation
 - Manual verification with user
 
@@ -241,7 +268,8 @@ At phase completion:
 - **Agent templates:** User project templates in `templates/agent/`
 - **State tracking:** JSON files (setup-state.json, implement_state.json, metadata.json)
 - **Audit trail:** Git notes for commit metadata
-- **Interoperability:** Both Claude Code and Gemini CLI use the same `.agent/` directory
+- **Antigravity skills:** SKILL.md files in `templates/antigravity/skills/`
+- **Interoperability:** All CLIs use the same `.agent/` directory
 
 ## Installation
 
@@ -281,15 +309,22 @@ cp -r templates/opencode/agents/* ~/.config/opencode/agents/
 #### Gemini CLI
 
 ```bash
-gemini install flow
+gemini extensions install flow
 # Or: cp -r commands/* ~/.gemini/extensions/flow/commands/
+```
+
+#### Antigravity
+
+```bash
+cp -r templates/antigravity/skills/* ~/.gemini/antigravity/skills/
+cp -r skills/* ~/.gemini/antigravity/skills/
 ```
 
 #### Beads (Required)
 
 ```bash
-npm install -g beads-cli
-bd init --stealth
+curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/beads_rust/main/install.sh | bash
+br init
 ```
 
 ## Related Documentation

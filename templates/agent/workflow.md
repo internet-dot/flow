@@ -2,7 +2,7 @@
 
 ## Guiding Principles
 
-1. **Beads is the Source of Truth:** Task status lives in Beads (`bd ready`, `bd close`). Use `/flow:sync` to export Beads state to spec.md when needed.
+1. **Beads is the Source of Truth:** Task status lives in Beads (`br ready`, `br close`). Use `/flow:sync` to export Beads state to spec.md when needed.
 2. **The Tech Stack is Deliberate:** Changes to the tech stack must be documented in `tech-stack.md` *before* implementation
 3. **Test-Driven Development:** Write unit tests before implementing functionality
 4. **High Code Coverage:** Aim for >80% code coverage for all modules
@@ -18,17 +18,20 @@ Beads provides persistent cross-session memory. Initialized in stealth mode duri
 **Session Start:**
 
 ```bash
-bd prime        # Load AI-optimized context
-bd ready        # List unblocked tasks (dependency-aware)
+br status                          # Workspace overview
+br ready                           # List unblocked tasks (dependency-aware)
+br list --status in_progress       # Resume active work
 ```
 
 **Session End:**
 
 ```bash
-bd sync         # Sync notes locally
+br sync --flush-only         # Sync notes locally
+git add .beads/
+git commit -m "sync beads"
 ```
 
-> If `bd` is unavailable, workflow degrades gracefully to git-only tracking.
+> If `br` is unavailable, workflow degrades gracefully to git-only tracking.
 
 ### When to Track in Beads
 
@@ -43,21 +46,23 @@ bd sync         # Sync notes locally
 **Why this matters:**
 
 - Notes survive context compaction - critical for multi-session work
-- `bd ready` finds unblocked work automatically
+- `br ready` finds unblocked work automatically
 - If resuming in 2 weeks would be hard without context, use Beads
 
 ### Creating Issues with Full Context
 
-**CRITICAL: Always include `--description` and `--notes` with `bd create`:**
+**CRITICAL: Always include `--description` with `br create`, then add notes via `br update`:**
 
 ```bash
-bd create "Task name" --parent {epic_id} -p 2 \
-  --description="WHY this issue exists and WHAT needs to be done" \
-  --notes="CONTEXT: files affected, dependencies, origin command, timestamp"
+br create "Task name" --parent {epic_id} -p 2 \
+  --description="WHY this issue exists and WHAT needs to be done"
+
+# Then add context notes (br create does NOT support --notes):
+br update {id} --notes "CONTEXT: files affected, dependencies, origin command, timestamp"
 ```
 
-- `--description`: The purpose and goal of this task
-- `--notes`: Context that helps future agents understand the work
+- `--description`: Purpose and goal (set at creation with `br create`)
+- `--notes`: Context for future agents (set via `br update` — survives compaction!)
 - Priority levels: P0=critical, P1=high, P2=medium, P3=low, P4=backlog
 
 ## Task Workflow
@@ -66,12 +71,12 @@ All tasks follow a strict lifecycle:
 
 ### Standard Task Workflow (Beads-First)
 
-**CRITICAL:** Beads is the source of truth. Never write `[x]` or `[~]` markers to spec.md.
+**CRITICAL:** Beads is the source of truth. Never write `[x]`, `[~]`, `[!]`, or `[-]` markers to spec.md. After ANY Beads state change, agents MUST run `/flow:sync` to update spec.md.
 
-1. **Select Task:** Use `bd ready` for dependency-aware selection, or fall back to parsing spec.md
+1. **Select Task:** Use `br ready` for dependency-aware selection, or fall back to parsing spec.md
 
 2. **Mark In Progress:**
-   - Sync to Beads: `bd update <id> --status in_progress`
+   - Sync to Beads: `br update <id> --status in_progress`
    - **Do NOT edit spec.md** - Beads is source of truth
 
 3. **Write Failing Tests (Red Phase):**
@@ -106,23 +111,31 @@ All tasks follow a strict lifecycle:
 
 9. **Record Task Completion (Beads-First):**
    - **Step 9.1: Get Commit Hash:** Obtain the hash of the *just-completed commit* (`git log -1 --format="%h"`).
-   - **Step 9.2: Close in Beads:** `bd close <id> --reason "commit: <sha>"`
-   - **Step 9.3 (Optional):** Run `/flow:sync <flow_id>` to export Beads state to spec.md for human-readable status
+   - **Step 9.2: Close in Beads:** `br close <id> --reason "commit: <sha>"`
+   - **Step 9.3 (MANDATORY):** Run `/flow:sync <flow_id>` to export Beads state to spec.md for human-readable status
    - **Do NOT manually edit spec.md markers** - use `/flow:sync` instead
 
 10. **Log Learnings:**
     - Append discoveries to track's `learnings.md`
-    - Sync to Beads: `bd update <id> --notes "pattern: ..."`
+    - Sync to Beads: `br update <id> --notes "pattern: ..."`
     - Elevate reusable patterns to `.agent/patterns.md` at phase completion
 
-### Knowledge Flywheel (Ralph-style)
+### Knowledge Flywheel (Three-Tier)
 
 1. **Capture** - After each task, append learnings to track's `learnings.md`
 2. **Elevate** - At phase/track completion, move reusable patterns to `.agent/patterns.md`
-3. **Archive** - Track is archived; patterns remain in `.agent/patterns.md`
-4. **Inherit** - New flows read `.agent/patterns.md` to prime context
+3. **Extract** - At archive, persist full learnings to `knowledge/{flow_id}.md`
+4. **Inherit** - New flows read `patterns.md` + scan `knowledge/index.md`
 
-**Important:** `.agent/patterns.md` is NOT archived with tracks. It remains at the top level as persistent project knowledge.
+**Three-Tier Knowledge:**
+
+| Tier | File | Loaded | Purpose |
+|------|------|--------|---------|
+| **Patterns** | `.agent/patterns.md` | Always | Elevated actionable rules for priming |
+| **Knowledge Index** | `.agent/knowledge/index.md` | Always | Lightweight scan of all flow learnings |
+| **Knowledge Entries** | `.agent/knowledge/{flow_id}.md` | On demand | Full detailed learnings per flow |
+
+**Important:** `.agent/patterns.md` is NOT archived with tracks. It remains at the top level as persistent project knowledge. Knowledge entries in `.agent/knowledge/` also persist independently of archives.
 
 **Learnings Entry Format:**
 
@@ -140,17 +153,17 @@ All tasks follow a strict lifecycle:
 
 ### Phase Completion Verification and Checkpointing Protocol
 
-**Trigger:** This protocol is executed immediately after a task is completed that also concludes a phase in `plan.md`.
+**Trigger:** This protocol is executed immediately after a task is completed that also concludes a phase in `spec.md`.
 
 1.  **Announce Protocol Start:** Inform the user that the phase is complete and the verification and checkpointing protocol has begun.
 
 2.  **Ensure Test Coverage for Phase Changes:**
-    -   **Step 2.1: Determine Phase Scope:** To identify the files changed in this phase, you must first find the starting point. Read `plan.md` to find the Git commit SHA of the *previous* phase's checkpoint. If no previous checkpoint exists, the scope is all changes since the first commit.
+    -   **Step 2.1: Determine Phase Scope:** To identify the files changed in this phase, you must first find the starting point. Read `spec.md` to find the Git commit SHA of the *previous* phase's checkpoint. If no previous checkpoint exists, the scope is all changes since the first commit.
     -   **Step 2.2: List Changed Files:** Execute `git diff --name-only <previous_checkpoint_sha> HEAD` to get a precise list of all files modified during this phase.
     -   **Step 2.3: Verify and Create Tests:** For each file in the list:
         -   **CRITICAL:** First, check its extension. Exclude non-code files (e.g., `.json`, `.md`, `.yaml`).
         -   For each remaining code file, verify a corresponding test file exists.
-        -   If a test file is missing, you **must** create one. Before writing the test, **first, analyze other test files in the repository to determine the correct naming convention and testing style.** The new tests **must** validate the functionality described in this phase's tasks (`plan.md`).
+        -   If a test file is missing, you **must** create one. Before writing the test, **first, analyze other test files in the repository to determine the correct naming convention and testing style.** The new tests **must** validate the functionality described in this phase's tasks (`spec.md`).
 
 3.  **Execute Automated Tests with Proactive Debugging:**
     -   Before execution, you **must** announce the exact shell command you will use to run the tests.
@@ -159,7 +172,7 @@ All tasks follow a strict lifecycle:
     -   If tests fail, you **must** inform the user and begin debugging. You may attempt to propose a fix a **maximum of two times**. If the tests still fail after your second proposed fix, you **must stop**, report the persistent failure, and ask the user for guidance.
 
 4.  **Propose a Detailed, Actionable Manual Verification Plan:**
-    -   **CRITICAL:** To generate the plan, first analyze `product.md`, `product-guidelines.md`, and `plan.md` to determine the user-facing goals of the completed phase.
+    -   **CRITICAL:** To generate the plan, first analyze `product.md`, `product-guidelines.md`, and `spec.md` to determine the user-facing goals of the completed phase.
     -   You **must** generate a step-by-step plan that walks the user through the verification process, including any necessary commands and specific, expected outcomes.
     -   The plan you present to the user **must** follow this format:
 
@@ -192,9 +205,9 @@ All tasks follow a strict lifecycle:
     -   Perform the commit with a clear and concise message (e.g., `flow(checkpoint): Checkpoint end of Phase X`).
 
 7.  **Record Verification in Beads:**
-    -   Update the epic with verification summary: `bd update <epic_id> --append-notes "Phase N verified: tests passed, manual verification confirmed by user, checkpoint: <sha>"`
+    -   Update the epic with verification summary: `br comments add <epic_id> "Phase N verified: tests passed, manual verification confirmed by user, checkpoint: <sha>"`
 
-8.  **Sync to spec.md (Optional):**
+8.  **Sync to spec.md (MANDATORY):**
     -   Run `/flow:sync <flow_id>` to export current Beads state to spec.md for human-readable status
     -   **Do NOT manually edit spec.md** - Beads is source of truth
 
@@ -336,9 +349,10 @@ A task is complete when:
 4. Documentation complete (if applicable)
 5. Code passes all configured linting and static analysis checks
 6. Works beautifully on mobile (if applicable)
-7. Implementation notes added to `plan.md`
+7. Implementation notes added to `spec.md`
 8. Changes committed with proper message
-9. Task closed in Beads with commit reference: `bd close <id> --reason "commit: <sha>"`
+9. Task closed in Beads with commit reference: `br close <id> --reason "commit: <sha>"`
+10. Markdown synced via `/flow:sync` (MANDATORY after any Beads state change)
 
 ## Emergency Procedures
 
@@ -348,7 +362,7 @@ A task is complete when:
 3. Implement minimal fix
 4. Test thoroughly including mobile
 5. Deploy immediately
-6. Document in plan.md
+6. Document in spec.md
 
 ### Data Loss
 1. Stop all write operations

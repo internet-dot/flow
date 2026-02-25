@@ -37,21 +37,19 @@ cat .agent/setup-state.json 2>/dev/null
 ### 0.1.1 Beads Validation
 
 ```bash
-command -v bd &> /dev/null && echo "BEADS_OK" || echo "BEADS_MISSING"
-bd version
+command -v br &> /dev/null && echo "BEADS_OK" || echo "BEADS_MISSING"
+br version
 ```
 
-If outdated, suggest: `npm update -g beads-cli`
+If outdated, suggest: `curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/beads_rust/main/install.sh | bash`
 
-Check hooks:
+**Note:** `br` is non-invasive and never executes git commands. After `br sync --flush-only`, you must manually run `git add .beads/ && git commit`.
 
-```bash
-bd setup opencode --check 2>/dev/null && echo "HOOKS_OK" || echo "HOOKS_MISSING"
-```
+### 0.1.2 Knowledge Base Check
 
-If HOOKS_MISSING, offer to install: `bd setup opencode`
+Check for missing `.agent/knowledge/` directory. If absent, create it and write `knowledge/index.md` from template.
 
-### 0.1.2 Configuration Validation
+### 0.1.3 Configuration Validation
 
 Check and update:
 
@@ -59,7 +57,7 @@ Check and update:
 - `.agent/workflow.md` - Check for outdated bd command syntax
 - `.agent/tech-stack.md` - Verify detected languages match codebase
 
-### 0.1.3 Alignment Summary
+### 0.1.4 Alignment Summary
 
 ```
 Alignment Complete
@@ -83,28 +81,17 @@ Run `/flow-status` to see current state.
 **CRITICAL: Beads is required.**
 
 ```bash
-command -v bd &> /dev/null && echo "BEADS_OK" || echo "BEADS_MISSING"
+command -v br &> /dev/null && echo "BEADS_OK" || echo "BEADS_MISSING"
 ```
 
-If `bd` not found, ask user:
+If `br` not found, ask user:
 
 > Beads CLI is required for Flow. Install it now?
 >
-> - **A) Yes** (recommended) - Run `npm install -g beads-cli`
+> - **A) Yes** (recommended) - Run `curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/beads_rust/main/install.sh | bash`
 > - **B) No** - Cannot proceed without Beads
 
-If installed, check hooks:
-
-```bash
-bd setup opencode --check 2>/dev/null && echo "HOOKS_OK" || echo "HOOKS_MISSING"
-```
-
-If HOOKS_MISSING:
-
-> Beads hooks not installed for OpenCode. Install now?
->
-> - **A) Yes** (recommended) - Run `bd setup opencode`
-> - **B) No** - Skip (Beads sync may not work properly)
+If installed, verify version is current.
 
 ---
 
@@ -214,7 +201,7 @@ Based on detected languages, offer relevant styleguides:
 **CRITICAL: Initialize in stealth mode by default.**
 
 ```bash
-bd init --stealth
+br init
 ```
 
 Or prompt user:
@@ -235,6 +222,13 @@ Create:
 - `<root_directory>/index.md` - File resolution index
 - `<root_directory>/flows.md` - Empty flow registry
 - `<root_directory>/patterns.md` - Empty patterns template
+- `<root_directory>/knowledge/index.md` - Knowledge base index (from template)
+
+```bash
+mkdir -p <root_directory>/knowledge
+```
+
+Copy `knowledge/index.md` from the Flow templates (`templates/agent/knowledge/index.md`).
 
 ---
 
@@ -309,10 +303,11 @@ Created:
 - index.md
 - flows.md
 - patterns.md
+- knowledge/index.md
 - code-styleguides/
 
 Next Steps:
-1. Run `bd prime` to load Beads context
+1. Run `br status` to see workspace overview
 2. Run `/flow-prd "description"` to create your first flow
 3. Run `/flow-implement {flow_id}` to start coding
 ```
@@ -322,7 +317,7 @@ Next Steps:
 ## Critical Rules
 
 1. **BEADS REQUIRED** - Cannot proceed without Beads CLI
-2. **HOOKS CHECK** - Ensure `bd setup opencode` has been run
+2. **CLI CHECK** - Ensure `br` is installed and available
 3. **ROOT DIRECTORY PROMPT** - Ask user where to store files
 4. **STEALTH DEFAULT** - Initialize Beads in stealth mode
 5. **ONE QUESTION AT A TIME** - Don't overwhelm the user

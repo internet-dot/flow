@@ -26,7 +26,7 @@ You MAY ONLY:
 
 - Create/edit files in `.agent/specs/` (spec.md, metadata.json)
 - Create/edit `.agent/flows.md` registry
-- Run `bd create` commands for Beads tracking
+- Run `br create` commands for Beads tracking
 - Read source code for analysis (but NEVER modify it)
 
 **Implementation happens ONLY when user explicitly runs `/flow-implement`.**
@@ -197,16 +197,16 @@ You MAY ONLY:
 6. **Beads Integration:**
 
     ```bash
-    bd create "Flow: <flow_id>" -t epic -p 2 \
-      --description="<flow_purpose_from_spec>" \
-      --notes="Files: <key_files_from_analysis>. Created by /flow-plan on <date>"
+    br create "Flow: <flow_id>" -t epic -p 2 \
+      --description="<flow_purpose_from_spec>"
+    br update {epic_id} --notes "Files: <key_files_from_analysis>. Created by /flow-plan on <date>"
     ```
 
     **CRITICAL:** The `--description` must include:
     - WHY this flow exists (the problem being solved)
     - WHAT the expected outcome is
 
-    **CRITICAL:** The `--notes` must include:
+    **CRITICAL:** The `--notes` (via `br update`) must include:
     - Key files identified in code analysis
     - Origin command (`/flow-plan`)
     - Creation timestamp
@@ -216,9 +216,9 @@ You MAY ONLY:
     For each phase/task in the plan:
 
     ```bash
-    bd create "Phase {N}: {phase_name}" --parent {epic_id} -t task -p 2 \
-      --description="WHY: {purpose}. WHAT: {deliverables}" \
-      --notes="Phase {N}. Files: {affected_files}. Origin: /flow-plan"
+    br create "Phase {N}: {phase_name}" --parent {epic_id} -t task -p 2 \
+      --description="WHY: {purpose}. WHAT: {deliverables}"
+    br update {task_id} --notes "Phase {N}. Files: {affected_files}. Origin: /flow-plan"
     ```
 
     **>5 Minute Rule:** If a task takes more than 5 minutes, it MUST be tracked in Beads.
@@ -257,5 +257,5 @@ Announce:
 4. **PATTERNS COMPLIANCE** - Check patterns.md and warn on violations
 5. **UNIFIED SPEC** - Single `spec.md` contains both requirements and plan. No separate `plan.md`.
 6. **SPECS DIRECTORY** - All artifacts go in `.agent/specs/`, not `.agent/prd/`
-7. **BEADS CONTEXT** - Include description and notes with bd create
+7. **BEADS CONTEXT** - Include description with br create, then notes via br update
 8. **HARD STOP** - End with explicit instruction to run `/flow-implement`

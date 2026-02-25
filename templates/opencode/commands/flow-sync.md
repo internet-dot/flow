@@ -21,18 +21,17 @@ Sync Beads task state to on-disk spec.md for a flow.
 ## Phase 3: Fetch Beads State
 
 ```bash
-bd show {beads_epic_id} --children --json
+br show {beads_epic_id} --format json
 ```
 
 Map Beads status to markdown markers:
 
 | Beads Status   | Marker |
 |----------------|--------|
-| `pending`      | `[ ]`  |
+| `open`         | `[ ]`  |
 | `in_progress`  | `[~]`  |
-| `completed`    | `[x]`  |
+| `closed`       | `[x]`  |
 | `blocked`      | `[!]`  |
-| `skipped`      | `[-]`  |
 
 ## Phase 4: Update spec.md
 

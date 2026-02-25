@@ -44,25 +44,26 @@ Implementing flow: **$ARGUMENTS**
 ## Phase 1: Beads Sync
 
 ```bash
-bd prime                    # Load AI-optimized context
-bd ready                    # List unblocked tasks
-bd show {epic_id}          # View flow status
+br status                   # Workspace overview
+br ready                    # List unblocked tasks
+br list --status in_progress # Resume active work
+br show {epic_id}          # View flow status
 ```
 
 ---
 
 ## Phase 2: Task Selection (Beads-First)
 
-**CRITICAL:** Beads is the source of truth for task status. Do NOT update plan.md markers.
+**CRITICAL:** Beads is the source of truth for task status. Do NOT update spec.md markers.
 
 ### 2.1 Primary: Use Beads
 
 ```bash
-bd ready                    # List unblocked tasks ready to work
-bd show {epic_id}          # View epic with all tasks
+br ready                    # List unblocked tasks ready to work
+br show {epic_id}          # View epic with all tasks
 ```
 
-Select task from `bd ready` output. If multiple ready tasks, ask user which to start.
+Select task from `br ready` output. If multiple ready tasks, ask user which to start.
 
 ### 2.2 Fallback: Parse spec.md
 
@@ -75,27 +76,27 @@ If Beads unavailable or no tasks found:
 
 ## Phase 3: Task Execution Loop
 
-For each task from `bd ready` or spec.md:
+For each task from `br ready` or spec.md:
 
 ### 3.1 Mark In Progress
 
 **If task not in Beads, create it first:**
 
 ```bash
-bd create "{task_description}" --parent {epic_id} -p 2 \
-  --description="{what_needs_to_be_done_and_why}" \
-  --notes="Phase {N}, Task {M}. Files: {affected_files}. Created by /flow-implement"
-bd update {new_task_id} --status in_progress
+br create "{task_description}" --parent {epic_id} -p 2 \
+  --description="{what_needs_to_be_done_and_why}"
+br update {new_task_id} --status in_progress
+br update {new_task_id} --notes "Phase {N}, Task {M}. Files: {affected_files}. Created by /flow-implement"
 ```
 
 **If task exists in Beads:**
 
 ```bash
-bd update {task_id} --status in_progress
+br update {task_id} --status in_progress
 ```
 
 **CRITICAL:** 
-- Always include `--description` and `--notes` when creating tasks
+- Always include `--description` when creating tasks, then add `--notes` via `br update`
 - Beads is the source of truth - do NOT write `[~]` markers to spec.md
 
 ### 3.2 Write Failing Tests (Red Phase)
@@ -137,10 +138,14 @@ git commit -m "{type}({scope}): {description}"
 ### 3.7 Sync to Beads (Source of Truth)
 
 ```bash
-bd close {task_id} --reason "commit: {sha}"
+br close {task_id} --reason "commit: {sha}"
 ```
 
-**CRITICAL:** Beads is the source of truth. Do NOT update spec.md with `[x]` markers.
+### 3.8 Sync to Markdown (MANDATORY)
+
+Run `/flow-sync {flow_id}` to export Beads state to spec.md.
+
+**CRITICAL:** Do NOT write `[x]` markers directly to spec.md. Beads is the source of truth — use `/flow-sync` instead.
 
 ### 3.9 Record Learning (if any)
 
@@ -160,7 +165,7 @@ If pattern discovered, append to `learnings.md`:
 Sync to Beads:
 
 ```bash
-bd update {task_id} --notes "{learning}"
+br update {task_id} --notes "{learning}"
 ```
 
 ---
@@ -207,8 +212,12 @@ git commit --allow-empty -m "flow(checkpoint): Phase {N} complete"
 Record in Beads:
 
 ```bash
-bd update {epic_id} --append-notes "Phase {N} verified: tests passed, user confirmed, checkpoint: {sha}"
+br comments add {epic_id} "Phase {N} verified: tests passed, user confirmed, checkpoint: {sha}"
 ```
+
+### 4.6 Sync to Markdown (MANDATORY)
+
+Run `/flow-sync {flow_id}` to export Beads state to spec.md after phase completion.
 
 ### 4.7 Offer Pattern Elevation
 
@@ -222,7 +231,7 @@ When all tasks complete:
 
 1. Run `/flow-archive {flow_id}` to archive
 2. Elevate remaining learnings to `patterns.md`
-3. Update `.agent/prds.md` status to `[x]`
+3. Update `.agent/flows.md` status to `[x]`
 
 ---
 
@@ -261,7 +270,8 @@ Next Task: {description}
 
 1. **TDD MANDATORY** - Write failing tests first
 2. **BEADS IS SOURCE OF TRUTH** - Never write `[x]` or `[~]` markers to spec.md
-3. **LEARNINGS CAPTURE** - Record patterns as discovered
-4. **PHASE CHECKPOINTS** - Verify and checkpoint at phase end
-5. **NO SKIP** - Use `/flow-skip` if task must be skipped
-6. **USE `bd ready`** - Always check Beads for next task
+3. **MANDATORY SYNC** - Run `/flow-sync` after every `br close` and phase completion
+4. **LEARNINGS CAPTURE** - Record patterns as discovered
+5. **PHASE CHECKPOINTS** - Verify and checkpoint at phase end
+6. **NO SKIP** - Use `/flow-skip` if task must be skipped
+7. **USE `br ready`** - Always check Beads for next task
