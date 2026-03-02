@@ -35,7 +35,7 @@ git clone https://github.com/cofin/flow.git
 cd flow
 
 # Run installer
-./scripts/install.sh
+./tools/scripts/install.sh
 ```
 
 The installer supports:
@@ -106,7 +106,7 @@ cp -r templates/antigravity/skills/* ~/.gemini/antigravity/skills/
 Flow will:
 
 1. Check/install Beads
-2. Initialize Beads in stealth mode
+2. Initialize Beads
 3. Create project context files
 4. Guide you through product, tech stack, and workflow setup
 5. Create your first flow
@@ -156,30 +156,30 @@ Flow follows TDD workflow (Beads-first):
 
 ## Commands
 
-| Purpose | Claude Code | Gemini / Codex / OpenCode |
-|---------|-------------|---------------------------|
-| Initialize project | `/flow-setup` | `/flow:setup` |
-| Create PRD (Saga) | `/flow-prd` | `/flow:prd` |
-| Plan single flow | `/flow-plan` | `/flow:plan` |
-| Sync Beads to spec | `/flow-sync` | `/flow:sync` |
-| Pre-PRD research | `/flow-research` | `/flow:research` |
-| Documentation workflow | `/flow-docs` | `/flow:docs` |
-| Implement tasks | `/flow-implement` | `/flow:implement` |
-| Check status | `/flow-status` | `/flow:status` |
-| Revert changes | `/flow-revert` | `/flow:revert` |
-| Validate integrity | `/flow-validate` | `/flow:validate` |
-| Block task | `/flow-block` | `/flow:block` |
-| Skip task | `/flow-skip` | `/flow:skip` |
-| Revise spec/plan | `/flow-revise` | `/flow:revise` |
-| Archive flow | `/flow-archive` | `/flow:archive` |
-| Export summary | `/flow-export` | `/flow:export` |
-| Session handoff | `/flow-handoff` | `/flow:handoff` |
-| Sync context | `/flow-refresh` | `/flow:refresh` |
-| Manage templates | `/flow-formula` | `/flow:formula` |
-| Ephemeral flow | `/flow-wisp` | `/flow:wisp` |
-| Extract template | `/flow-distill` | `/flow:distill` |
+| Purpose | Claude Code | Gemini / OpenCode | Codex CLI |
+|---------|-------------|-------------------|-----------|
+| Initialize project | `/flow-setup` | `/flow:setup` | `$flow:setup` |
+| Create PRD (Saga) | `/flow-prd` | `/flow:prd` | `$flow:prd` |
+| Plan single flow | `/flow-plan` | `/flow:plan` | `$flow:plan` |
+| Sync Beads to spec | `/flow-sync` | `/flow:sync` | `$flow:sync` |
+| Pre-PRD research | `/flow-research` | `/flow:research` | `$flow:research` |
+| Documentation workflow | `/flow-docs` | `/flow:docs` | `$flow:docs` |
+| Implement tasks | `/flow-implement` | `/flow:implement` | `$flow:implement` |
+| Check status | `/flow-status` | `/flow:status` | `$flow:status` |
+| Revert changes | `/flow-revert` | `/flow:revert` | `$flow:revert` |
+| Validate integrity | `/flow-validate` | `/flow:validate` | `$flow:validate` |
+| Block task | `/flow-block` | `/flow:block` | `$flow:block` |
+| Skip task | `/flow-skip` | `/flow:skip` | `$flow:skip` |
+| Revise spec/plan | `/flow-revise` | `/flow:revise` | `$flow:revise` |
+| Archive flow | `/flow-archive` | `/flow:archive` | `$flow:archive` |
+| Export summary | `/flow-export` | `/flow:export` | `$flow:export` |
+| Session handoff | `/flow-handoff` | `/flow:handoff` | `$flow:handoff` |
+| Sync context | `/flow-refresh` | `/flow:refresh` | `$flow:refresh` |
+| Manage templates | `/flow-formula` | `/flow:formula` | `$flow:formula` |
+| Ephemeral flow | `/flow-wisp` | `/flow:wisp` | `$flow:wisp` |
+| Extract template | `/flow-distill` | `/flow:distill` | `$flow:distill` |
 
-> **Note**: Codex CLI and OpenCode use the same `/flow:command` syntax as Gemini CLI.
+> **Note**: Gemini CLI and OpenCode use `/flow:command`; Codex examples use `$flow:command`.
 
 ## Directory Structure
 
@@ -204,7 +204,7 @@ project/
 │   │       ├── learnings.md
 │   │       └── metadata.json
 │   └── archive/             # Completed flows
-└── .beads/                  # Beads data (stealth mode)
+└── .beads/                  # Beads data (local-only)
 ```
 
 ## Flow Naming

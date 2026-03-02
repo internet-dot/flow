@@ -17,6 +17,7 @@ Read `.claude/skills/sqlspec_adapters/asyncpg.md` for Claude's adapter playbook 
 
 ## How it works
 
+- **Parameter Style**: Asyncpg uses PostgreSQL positional placeholders (`$1`, `$2`, ...), not named placeholders. SQLSpec should support translating both automatically using the parameter profile.
 - Use config classes to map `connection_config`, `driver_features`, and statement config; register via `SQLSpec.add_config()`.
 - Override `_connection_in_transaction()` with direct attribute access (uses connection.is_in_transaction().).
 - Flow parameter styles through `StatementConfig` from the driver profile; adapter guides describe defaults and overrides.

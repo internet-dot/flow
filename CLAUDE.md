@@ -255,7 +255,7 @@ At phase completion:
 
 - Run full test suite
 - Verify coverage requirements
-- Create git tag: `checkpoint/{flow_id}/phase-{N}`
+- Ensure phase completion is committed
 - Prompt for pattern elevation
 - Manual verification with user
 
@@ -276,7 +276,7 @@ At phase completion:
 ### Intelligent Installer (Recommended)
 
 ```bash
-./scripts/install.sh
+./tools/scripts/install.sh
 ```
 
 The installer detects installed CLIs, backs up existing configs, and merges intelligently.
@@ -293,7 +293,7 @@ cp -r skills/* ~/.claude/skills/
 #### Codex CLI
 
 ```bash
-cp -r templates/codex/prompts/* ~/.codex/prompts/
+cp -r templates/codex/skills/* ~/.codex/skills/
 cat templates/codex/AGENTS.md >> ~/.codex/AGENTS.md
 cp -r skills/flow ~/.codex/skills/
 cp -r skills/beads ~/.codex/skills/

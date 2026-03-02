@@ -79,6 +79,16 @@ class UserService(SQLAlchemyAsyncRepositoryService[m.User]):
     async def to_model_on_update(self, data: ModelDictT[m.User]) -> ModelDictT[m.User]:
         return await self._populate_model(data)
 
+    # Transform data before create/update
+    async def to_model(
+        self,
+        data: ModelDictT[m.User],
+        operation: str | None = None,
+    ) -> m.User:
+        if isinstance(data, dict):
+            data = await self._populate_model(data)
+        return await super().to_model(data, operation)
+
     async def _populate_model(self, data: dict) -> dict:
         """Custom model population logic."""
         if "password" in data:
@@ -224,7 +234,12 @@ Type/backend guidance:
 ## Migration Commands
 
 ```bash
-# Create migration
+# Advanced Alchemy CLI (Standalone)
+alchemy make-migrations --config path.to.alchemy-config.config
+alchemy upgrade --config path.to.alchemy-config.config
+alchemy downgrade --config path.to.alchemy-config.config
+
+# Litestar integration commands
 litestar database make-migrations
 
 # Apply migrations

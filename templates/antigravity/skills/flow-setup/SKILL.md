@@ -1,6 +1,6 @@
 ---
 name: flow-setup
-description: "Initialize project with Flow framework and Beads integration. Use when starting a new project or aligning an existing Flow setup."
+description: "Initialize project with context files, Beads, and first flow"
 ---
 
 # Flow Setup
@@ -203,18 +203,17 @@ Based on detected languages, offer relevant styleguides:
 
 ## Phase 5: Beads Initialization
 
-**CRITICAL: Initialize in stealth mode by default.**
+**CRITICAL: Configure for local-only use by default.**
 
 ```bash
-br init
-```
+br init --prefix <project_name_slug>```
 
 Or prompt user:
 
 > **Beads mode:**
 >
-> - **Stealth** (recommended) - Local-only, personal use
-> - **Normal** - Committed to repo, team-shared
+> - **Local-only** (recommended) - Add to .gitignore for personal use
+> - **Team** - Commit to repo for team sharing
 
 Create `<root_directory>/beads.json` with configuration.
 
@@ -283,7 +282,6 @@ Save setup state to `<root_directory>/setup-state.json`:
 {
   "last_successful_step": "complete",
   "project_type": "brownfield|greenfield",
-  "beads_mode": "stealth|normal",
   "root_directory": "<root_directory>",
   "timestamp": "ISO timestamp"
 }
@@ -297,7 +295,6 @@ Save setup state to `<root_directory>/setup-state.json`:
 Flow Setup Complete
 
 Directory: <root_directory>
-Beads Mode: [stealth|normal]
 
 Created:
 - product.md
@@ -319,12 +316,30 @@ Next Steps:
 
 ---
 
+## Phase 8: Install Git Hooks
+
+**PROTOCOL: Install pre-commit hook to automate Beads sync.**
+
+Copy the `pre-commit` hook to the `.git/hooks/` directory to ensure Bead states remain synchronized before any commit:
+
+```bash
+if [ -f ~/.flow/hooks/pre-commit ]; then
+  cp ~/.flow/hooks/pre-commit .git/hooks/pre-commit
+  chmod +x .git/hooks/pre-commit
+elif [ -f ~/.gemini/extensions/flow/tools/scripts/hooks/pre-commit ]; then
+  cp ~/.gemini/extensions/flow/tools/scripts/hooks/pre-commit .git/hooks/pre-commit
+  chmod +x .git/hooks/pre-commit
+fi
+```
+
+---
+
 ## Critical Rules
 
 1. **BEADS REQUIRED** - Cannot proceed without Beads CLI
 2. **CLI CHECK** - Ensure `br` is installed and available
 3. **ROOT DIRECTORY PROMPT** - Ask user where to store files
-4. **STEALTH DEFAULT** - Initialize Beads in stealth mode
+4. **LOCAL DEFAULT** - Configure Beads for local-only use
 5. **ONE QUESTION AT A TIME** - Don't overwhelm the user
 6. **DETECT FIRST** - Auto-detect tech stack before asking
 7. **APPEND ONLY** - Never overwrite .gitignore
