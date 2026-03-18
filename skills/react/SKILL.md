@@ -162,7 +162,7 @@ from litestar import Litestar
 from litestar_vite import ViteConfig, VitePlugin
 
 vite_config = ViteConfig(
-    mode="spa",  # or "hybrid" for Inertia
+    mode="spa",
     paths=PathConfig(resource_dir="src"),
 )
 
@@ -183,23 +183,24 @@ export default defineConfig({
 });
 ```
 
-### React with Inertia.js + Litestar
+### React SPA Integration (e.g. TanStack Router)
+
+When operating in SPA mode (`mode="spa"`), the entire routing lifecycle is managed on the frontend. Ensure your Litestar app maps a catch-all route to serve the `index.html` asset bundle (automatically handled by the VitePlugin in SPA mode) so deep links work locally and in production.
 
 ```tsx
-// app.tsx
-import { createInertiaApp } from '@inertiajs/react';
-import { createRoot } from 'react-dom/client';
-import { resolvePageComponent } from 'litestar-vite-plugin/inertia-helpers';
+// src/main.tsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen' // Or your manual routes
 
-createInertiaApp({
-  resolve: (name) => resolvePageComponent(
-    name,
-    import.meta.glob('./pages/**/*.tsx'),
-  ),
-  setup({ el, App, props }) {
-    createRoot(el).render(<App {...props} />);
-  },
-});
+const router = createRouter({ routeTree })
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>
+)
 ```
 
 ### Using Generated Types
@@ -233,6 +234,43 @@ For comprehensive coverage of these commonly-used React libraries:
 | Shadcn/ui components | `shadcn` | All components |
 | Tailwind CSS | `tailwind` | Styling patterns |
 
+
+## Deployment
+
+### Static Runtimes
+Bundle traditional SPA apps into static sets:
+
+```bash
+vite build
+```
+
+### Server and Edge Nodes
+Align Server Actions and components to runtimes offering full Server-Side script continuity safely supporting `'use server'` handlers.
+
+---
+
+## CI/CD Actions
+
+Example GitHub Actions workflow for static build:
+
+```yaml
+name: React CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+```
 
 ## Official References
 

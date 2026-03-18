@@ -179,6 +179,23 @@ export class ItemFormComponent {
 
 This section is project-specific integration guidance. For plain Angular projects, use standard Angular CLI / Vite workflows.
 
+### SPA Router Configuration
+
+When operating in SPA mode (`mode="spa"`), routing is managed via the Angular Router on the frontend instead of the server resolving HTML endpoints. Configure your router with `provideRouter` and client-side specific options (e.g. hash routing if fallback is missing, or standard HTML5 path routing supported by Litestar's SPA routing mode).
+
+```typescript
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes, withComponentInputBinding())
+  ]
+};
+```
+
 ### Setup with VitePlugin
 
 ```python
@@ -236,6 +253,44 @@ litestar assets build      # Production build
 litestar assets generate-types  # Generate TS types
 ```
 
+
+## Deployment
+
+### Static Asset Bundles
+Angular builds compile into optimal static files:
+
+```bash
+ng build
+# or litestar assets build for integrated setups
+```
+
+### Hybrid Prerendering (SSR/SSG)
+Deploy to Edge nodes or node servers. Ensure triggers are optimized post-hydrate context avoiding layout shifts for deferred blocks.
+
+---
+
+## CI/CD Actions
+
+Example GitHub Actions workflow for building:
+
+```yaml
+name: Angular CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+```
 
 ## Official References
 
