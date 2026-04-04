@@ -61,7 +61,7 @@ If outdated, suggest: `curl -fsSL https://raw.githubusercontent.com/Dicklesworth
 
 **For each discovered spec directory:**
 
-```
+```text
 Found [N] specs in legacy locations:
 
 Active (specs/active/):
@@ -101,7 +101,7 @@ D) Skip migration
 1. Parse learnings entries
 2. Cross-reference with current codebase:
 
-```
+```text
 From user-auth/learnings.md:
 
 ✓ VALID: "Use Zod for form validation"
@@ -116,9 +116,9 @@ From user-auth/learnings.md:
   → Removing from migration
 ```
 
-3. Present validated learnings for confirmation
-4. Merge confirmed patterns into `.agents/patterns.md`
-5. Archive original learnings.md with migration note
+1. Present validated learnings for confirmation
+2. Merge confirmed patterns into `.agents/patterns.md`
+3. Archive original learnings.md with migration note
 
 ### 0.1.4 Knowledge Base Check
 
@@ -134,7 +134,7 @@ Check and update:
 
 ### 0.1.6 Alignment Summary
 
-```
+```text
 Alignment Complete
 
 ✓ Beads: v{version} (up to date)
@@ -396,7 +396,7 @@ Save setup state to `<root_directory>/setup-state.json`:
 
 ## Final Summary
 
-```
+```text
 Flow Setup Complete
 
 Directory: <root_directory>
